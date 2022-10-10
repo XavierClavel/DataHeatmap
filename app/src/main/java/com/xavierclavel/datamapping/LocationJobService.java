@@ -18,8 +18,10 @@ import android.util.Log;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.Random;
 import java.util.Set;
 
 public class LocationJobService extends JobService {
@@ -28,6 +30,7 @@ public class LocationJobService extends JobService {
     LocationJob locationJob;
     public static LocationJobService instance;
     public static JobParameters locationJobParameters;
+    static float i = 0f;
 
     // Méthode appelée quand la tâche est lancée
     @Override
@@ -81,6 +84,8 @@ public class LocationJobService extends JobService {
                             if (location != null) {
                                 // Logic to handle location object
                                 Log.d("location", "user location is : " + location.toString());
+                                HeatmapManager.updateHeatmap(new LatLng(location.getLatitude() + i, location.getLongitude() + i), 10);
+                                i += 0.01f;
                             }
                         }
                     });
@@ -100,7 +105,7 @@ public class LocationJobService extends JobService {
                     new String[] {
                             Manifest.permission.ACCESS_COARSE_LOCATION,
                             Manifest.permission.ACCESS_FINE_LOCATION,
-                    }, 564);
+                    }, 565);
         }
         else Log.d("permission", "Permissions Already Granted");
     }
