@@ -7,8 +7,13 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -33,7 +38,8 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBEane84xLAaCBmrJW8ErwRgVPSDPN2HxM" />
+            android:value="MAPS_API_KEY" />
+
 
         <activity
             android:name=".MapActivity"
@@ -46,6 +52,10 @@
             android:permission="android.permission.FOREGROUND_SERVICE" />
         <service
             android:name=".BluetoothJobService"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".WiFiJobService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service

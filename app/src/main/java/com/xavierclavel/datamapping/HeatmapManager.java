@@ -1,5 +1,6 @@
 package com.xavierclavel.datamapping;
 
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -13,16 +14,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HeatmapManager {
-    static List<WeightedLatLng> weightedLatLngs;
+    public static List<WeightedLatLng> weightedLatLngs;
     static HeatmapTileProvider provider;
     static TileOverlay tileOverlay;
+    static boolean mapReady = false;
+
+    static LatLng locationData;
+    static Integer bluetoothData;
+    static WeightedLatLng sensorsData;
 
 
-    public static void addHeatMap() {
-        weightedLatLngs = new ArrayList<>();
+    public static void initializeHeatMap() {
+        weightedLatLngs = weightedLatLngs != null ? weightedLatLngs : new ArrayList<>();
         List<LatLng> latLngs = new ArrayList<>();
 
-        latLngs.add(new LatLng(-37.1886, 145.708));
+        latLngs.add(new LatLng(0, 0));
+        weightedLatLngs.add(new WeightedLatLng(new LatLng(0, 0), 0));
 
 
 
@@ -34,15 +41,38 @@ public class HeatmapManager {
         // Add a tile overlay to the map, using the heat map tile provider.
         tileOverlay = MapActivity.mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
 
+        mapReady = true;
 
+        provider.setWeightedData(weightedLatLngs);
+        tileOverlay.clearTileCache();
+    }
+
+    public static void locationDataSocket(LatLng latLng) {
+        locationData = latLng;
+        if (bluetoothData != null) updateHeatmap();
+    }
+
+    public static void bluetoothDataSocket(int intensity) {
+        bluetoothData = intensity;
+        MainActivity.updateDashboard(bluetoothData);
+        if (locationData != null) updateHeatmap();
     }
 
 
 
-    public static void updateHeatmap(LatLng latLng, double intensity) {
-        weightedLatLngs.add(new WeightedLatLng(latLng, intensity));
-        provider.setWeightedData(weightedLatLngs);
-        tileOverlay.clearTileCache();
+    static void updateHeatmap() {
+        Log.d("heatmap manager", "new data point acquired");
+        Toast.makeText(ForegroundService.instance, "Data point acquired", Toast.LENGTH_LONG).show();
+        weightedLatLngs = weightedLatLngs != null ? weightedLatLngs : new ArrayList<>();
+        weightedLatLngs.add(new WeightedLatLng(locationData, bluetoothData));   //data set of the heatmap
+        XmlManager.Memorize(locationData, bluetoothData);
+        locationData = null;
+        bluetoothData = null;
+
+        if (mapReady) {
+            provider.setWeightedData(weightedLatLngs);
+            tileOverlay.clearTileCache();
+        }
     }
 
 

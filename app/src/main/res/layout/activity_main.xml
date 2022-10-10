@@ -2,63 +2,118 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottom_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="500dp"
+            android:layout_height="500dp"
+            android:layout_centerInParent="true"
+            android:max="500"
+            android:progress="0"
+            android:progressDrawable="@drawable/circular" />
+
+        <ProgressBar
+            android:id="@+id/pppppprogressBar"
+            style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
+            android:layout_width="500dp"
+            android:layout_height="500dp"
+            android:layout_centerInParent="true"
+            android:indeterminateTint="#F18805"
+            android:progressTint="#00BCD4" />
 
         <TextView
             android:id="@+id/nbBluetoothDevices"
             android:layout_width="match_parent"
-            android:layout_height="575dp"
+            android:layout_height="500dp"
+            android:layout_centerInParent="true"
             android:gravity="center"
             android:text="-"
-            android:textSize="96sp" />
+            android:textSize="150sp" />
+    </RelativeLayout>
 
-        <ImageView
-            android:id="@+id/imageView"
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <Switch
+            android:id="@+id/switch1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/googleg_standard_color_18" />
+            android:layout_height="32dp"
+            android:paddingHorizontal="30dp"
+            android:text="Keep data" />
 
         <LinearLayout
-            android:layout_width="409dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="1dp"
-            android:layout_marginTop="1dp"
-            android:layout_marginEnd="1dp"
-            android:layout_marginBottom="1dp"
-            android:gravity="center"
-            android:orientation="horizontal">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="top|center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:layout_editor_absoluteY="550dp">
+
 
             <Button
-                android:id="@+id/buttonData"
+                android:id="@+id/buttonStop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:backgroundTint="#B85252"
+                android:layout_weight="1"
+                android:text="stop" />
+
+            <Button
+                android:id="@+id/buttonWrite"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_weight="1"
-                android:text="Data" />
-
-            <Button
-                android:id="@+id/buttonMap"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="10dp"
-                android:layout_weight="1"
-                android:text="Map" />
+                android:backgroundTint="#919191"
+                android:text="write" />
         </LinearLayout>
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbarSize="50dp" />
+    </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:gravity="bottom|center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+
+        <Button
+            android:id="@+id/buttonData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:layout_weight="1"
+            android:backgroundTint="#F18805"
+            android:text="data" />
+
+        <Button
+            android:id="@+id/buttonMap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:layout_weight="1"
+            android:backgroundTint="#F18805"
+            android:text="Map" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

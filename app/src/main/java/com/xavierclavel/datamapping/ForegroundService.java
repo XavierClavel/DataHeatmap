@@ -24,6 +24,7 @@ public class ForegroundService extends Service {
 
     public static JobScheduler scheduler;
     public static ForegroundService instance;
+    static int bluetoothJobId = 111;
     static int wiFiJobId = 112;
     static int locationJobId = 113;
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
@@ -43,13 +44,17 @@ public class ForegroundService extends Service {
                 .build();
         startForeground(1, notification);
         //do heavy work on a background thread
-        //stopSelf();
 
         scheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+
+        LocationJobService.shouldReschedule = true;
+        WiFiJobService.shouldReschedule = true;
+        BluetoothJobService.shouldReschedule = true;
 
         Log.d("foreground service", "here");
         // Lancer ici le job de monitoring dans une async task
         //scheduleJobBluetooth();
+        scheduleJobWiFi();
         scheduleJobLocation();
         return START_NOT_STICKY;
     }
@@ -57,6 +62,18 @@ public class ForegroundService extends Service {
     public static void scheduleJobBluetooth() {
         Log.d("foreground service", "about to start bluetooth job");
         ComponentName serviceName = new ComponentName(instance, BluetoothJobService.class);
+        JobInfo jobInfo = new JobInfo.Builder(bluetoothJobId, serviceName)
+                .setMinimumLatency(30000)
+                .build();
+        int result = scheduler.schedule(jobInfo);
+        if (result == JobScheduler.RESULT_SUCCESS) {
+            Log.d("foreground service", "success");
+        }
+    }
+
+    public static void scheduleJobWiFi() {
+        Log.d("foreground service", "about to start job");
+        ComponentName serviceName = new ComponentName(instance, WiFiJobService.class);
         JobInfo jobInfo = new JobInfo.Builder(wiFiJobId, serviceName)
                 .setMinimumLatency(5000)
                 .build();
@@ -88,16 +105,25 @@ public class ForegroundService extends Service {
         manager.createNotificationChannel(serviceChannel);
     }
 
+    public static void stopService() {
+        instance.stopForeground(true);
+        LocationJobService.shouldReschedule = false;
+        WiFiJobService.shouldReschedule = false;
+        BluetoothJobService.shouldReschedule = false;
+
+        instance.stopSelf();
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
-
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+        //unregisterReceiver(BluetoothJobService.receiver);   //avoid leaking
         Log.d("foreground service", "foreground service destroyed");
+        super.onDestroy();
     }
 
     @Nullable

@@ -30,7 +30,6 @@ public class LocationJobService extends JobService {
     LocationJob locationJob;
     public static LocationJobService instance;
     public static JobParameters locationJobParameters;
-    static float i = 0f;
 
     // Méthode appelée quand la tâche est lancée
     @Override
@@ -49,7 +48,7 @@ public class LocationJobService extends JobService {
 // Retourne vrai si le scheduler doit relancer la tâche
     @Override
     public boolean onStopJob(JobParameters params) {
-        Log.d("wifi job", "onStopJob id=" + params.getJobId());
+        Log.d("location job", "onStopJob id=" + params.getJobId());
 // ***** Arrêter le thread du job ici ******
         return shouldReschedule;
     }
@@ -65,7 +64,6 @@ public class LocationJobService extends JobService {
             Log.d("location job", "location job started");
             try {
                 getLocationData();
-                //ForegroundService.displayToast();
             } catch (Exception e) {
                 Log.d("wifi job", "failed to read location data");
             } finally {
@@ -84,8 +82,8 @@ public class LocationJobService extends JobService {
                             if (location != null) {
                                 // Logic to handle location object
                                 Log.d("location", "user location is : " + location.toString());
-                                HeatmapManager.updateHeatmap(new LatLng(location.getLatitude() + i, location.getLongitude() + i), 10);
-                                i += 0.01f;
+                                LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
+                                HeatmapManager.locationDataSocket(currentPosition);
                             }
                         }
                     });
