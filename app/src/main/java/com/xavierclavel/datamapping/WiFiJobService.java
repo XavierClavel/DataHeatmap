@@ -5,6 +5,9 @@ import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -58,7 +61,7 @@ public class WiFiJobService extends JobService  {
         protected String doInBackground(String... params) {
             Log.d("wifi job", "wifi job started");
             try {
-                wifiMan = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                /*wifiMan = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
                 int permission1 = ContextCompat.checkSelfPermission(WiFiJobService.instance, Manifest.permission.ACCESS_COARSE_LOCATION);
 
@@ -77,12 +80,22 @@ public class WiFiJobService extends JobService  {
                 }
                 else Log.d("permission", "Permissions Already Granted");
 
-                List<ScanResult> scanResults = wifiMan.getScanResults();
+                List<ScanResult> scanResults = wifiMan.getScanResults();*/
+
+                ConnectivityManager cm = (ConnectivityManager) MainActivity.instance.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo netInfo = cm.getActiveNetworkInfo();
+                //should check null because in airplane mode it will be null
+                NetworkCapabilities nc = cm.getNetworkCapabilities(cm.getActiveNetwork());
+                int downSpeed = nc.getLinkDownstreamBandwidthKbps();
+                int upSpeed = nc.getLinkUpstreamBandwidthKbps();
 
                 Log.d("Debug____________", "");
                 Log.d("wifi job", "successfully read wifi data");
-                Log.d("wifi job", "amount of data : " + scanResults.size());
-                HeatmapManager.bluetoothDataSocket(scanResults.size());
+                //Log.d("wifi job", "amount of data : " + downSpeed);
+
+                Log.d("mobile data", "downspeed = " + downSpeed);
+                Log.d("mobile data", "upspeed = " + upSpeed);
+                HeatmapManager.bluetoothDataSocket(downSpeed, upSpeed);
 
             } catch (Exception e) {
                 Log.d("wifi job", "failed to read wifi data");

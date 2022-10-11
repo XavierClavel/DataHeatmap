@@ -10,7 +10,6 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -22,9 +21,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DataMapping">
-
-
-
+        <activity
+            android:name=".DataActivity"
+            android:exported="false" />
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
@@ -40,11 +39,11 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="MAPS_API_KEY" />
 
-
         <activity
             android:name=".MapActivity"
             android:exported="false"
             android:label="@string/title_activity_map" />
+
         <service
             android:name=".ForegroundService"
             android:enabled="true"
@@ -62,6 +61,7 @@
             android:name=".LocationJobService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

@@ -11,15 +11,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
+import android.location.LocationRequest;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.CancellationToken;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnTokenCanceledListener;
 
 import java.util.Random;
 import java.util.Set;
@@ -75,18 +82,30 @@ public class LocationJobService extends JobService {
 
         void getLocationData() {
             checkPermission();
-            MainActivity.fusedLocationClient.getLastLocation().addOnSuccessListener(MainActivity.instance, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            // Got last known location. In some rare situations this can be null.
-                            if (location != null) {
-                                // Logic to handle location object
-                                Log.d("location", "user location is : " + location.toString());
-                                LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
-                                HeatmapManager.locationDataSocket(currentPosition);
-                            }
-                        }
-                    });
+
+            MainActivity.fusedLocationClient.getCurrentLocation(LocationRequest.QUALITY_HIGH_ACCURACY, new CancellationToken() {
+                @Override
+                public boolean isCancellationRequested() {
+                    return false;
+                }
+
+                @NonNull
+                @Override
+                public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
+                    return null;
+                }
+            }).addOnSuccessListener(MainActivity.instance, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    // Get current location. In some rare situations this can be null.
+                    if (location != null) {
+                        // Logic to handle location object
+                        Log.d("location", "user location is : " + location.toString());
+                        LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
+                        HeatmapManager.locationDataSocket(currentPosition);
+                    }
+                }
+            });
             return;
         }
     }

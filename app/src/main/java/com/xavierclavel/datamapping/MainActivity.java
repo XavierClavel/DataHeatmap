@@ -89,14 +89,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void onClick(View view) {
-
-
-
-
         switch(view.getId()) {
             case R.id.buttonMap:
                 Intent intent = new Intent(this, MapActivity.class);
                 startActivity(intent);
+                break;
+
+            case R.id.buttonData:
+                Intent intent2 = new Intent(this, DataActivity.class);
+                startActivity(intent2);
                 break;
 
             case R.id.buttonWrite:
@@ -119,14 +120,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ContextCompat.startForegroundService(this, new Intent(this, ForegroundService.class));
                 }
                 break;
-
-            case R.id.buttonData:
-                //
-                break;
         }
     }
 
-    public static void updateDashboard(int nbDevices) {
-        if (!appPaused) nbBluetoothDevicesDisplay.setText("" + nbDevices);
+    public static void updateDashboard(int downSpeed) {
+        if (!appPaused) {
+            nbBluetoothDevicesDisplay.setText(downSpeedToNetwork(downSpeed));
+        }
+    }
+
+    public static String downSpeedToNetwork(int downSpeed) {
+        if (downSpeed > 20000) return "4G";
+        if (downSpeed > 14000) return "3G";
+        if (downSpeed > 10000) return "H+";
+        if (downSpeed > 100) return "H";
+        if (downSpeed > 50) return "E";
+        return "x";
     }
 }

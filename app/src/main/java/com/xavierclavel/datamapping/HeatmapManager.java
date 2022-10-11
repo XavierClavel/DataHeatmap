@@ -1,10 +1,10 @@
 package com.xavierclavel.datamapping;
 
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Tile;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
@@ -20,7 +20,8 @@ public class HeatmapManager {
     static boolean mapReady = false;
 
     static LatLng locationData;
-    static Integer bluetoothData;
+    static Integer mobileNetworkDataDownlink;
+    static Integer mobileNetworkDataUplink;
     static WeightedLatLng sensorsData;
 
 
@@ -48,13 +49,16 @@ public class HeatmapManager {
     }
 
     public static void locationDataSocket(LatLng latLng) {
+        DataActivity.updateLocationDisplay(latLng);
         locationData = latLng;
-        if (bluetoothData != null) updateHeatmap();
+        if (mobileNetworkDataDownlink != null) updateHeatmap();
     }
 
-    public static void bluetoothDataSocket(int intensity) {
-        bluetoothData = intensity;
-        MainActivity.updateDashboard(bluetoothData);
+    public static void bluetoothDataSocket(int downSpeed, int upSpeed) {
+        DataActivity.updateMobileNetworkDisplay(downSpeed, upSpeed);
+        mobileNetworkDataDownlink = downSpeed;
+        mobileNetworkDataUplink = upSpeed;
+        MainActivity.updateDashboard(mobileNetworkDataDownlink);
         if (locationData != null) updateHeatmap();
     }
 
@@ -64,10 +68,10 @@ public class HeatmapManager {
         Log.d("heatmap manager", "new data point acquired");
         Toast.makeText(ForegroundService.instance, "Data point acquired", Toast.LENGTH_LONG).show();
         weightedLatLngs = weightedLatLngs != null ? weightedLatLngs : new ArrayList<>();
-        weightedLatLngs.add(new WeightedLatLng(locationData, bluetoothData));   //data set of the heatmap
-        XmlManager.Memorize(locationData, bluetoothData);
+        weightedLatLngs.add(new WeightedLatLng(locationData, mobileNetworkDataDownlink));   //data set of the heatmap
+        XmlManager.Memorize(locationData, mobileNetworkDataDownlink);
         locationData = null;
-        bluetoothData = null;
+        mobileNetworkDataDownlink = null;
 
         if (mapReady) {
             provider.setWeightedData(weightedLatLngs);
