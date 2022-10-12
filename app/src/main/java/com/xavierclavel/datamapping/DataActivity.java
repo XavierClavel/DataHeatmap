@@ -20,7 +20,7 @@ public class DataActivity extends AppCompatActivity {
     static TextView downSpeedDisplay;
     static TextView upSpeedDisplay;
     static TextView mobileNetworkDisplay;
-    static LatLng lastLocation = null;
+    public static LatLng lastLocation = null;
     static Integer lastDownSpeed = null;
     static Integer lastUpSpeed = null;
     static String lastMobileNetwork = null;
@@ -53,10 +53,10 @@ public class DataActivity extends AppCompatActivity {
         if (lastDownSpeed != null && Objects.equals(downSpeed, lastDownSpeed)) return; //data has not changed
         lastDownSpeed = downSpeed;
         lastUpSpeed = upSpeed;
+        lastMobileNetwork = MainActivity.downSpeedToNetwork(downSpeed);
         if (!activityInitialized) return;
         downSpeedDisplay.setText(""+downSpeed);
         upSpeedDisplay.setText(""+upSpeed);
-        lastMobileNetwork = MainActivity.downSpeedToNetwork(downSpeed);
         mobileNetworkDisplay.setText(lastMobileNetwork);
 
 

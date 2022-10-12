@@ -1,13 +1,18 @@
 package com.xavierclavel.datamapping;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -60,7 +65,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ContextCompat.startForegroundService(this, new Intent(this, ForegroundService.class));
         Log.d("main activity", "initiated");
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        View decorView = getWindow().getDecorView();
+        // Hide both the navigation bar and the status bar.
+        // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
+        // a general rule, you should design your app to hide the status bar whenever you
+        // hide the navigation bar.
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        decorView.setSystemUiVisibility(uiOptions);
+
+        checkPermission();
+        TelephonyManager mTelephonyManager = (TelephonyManager)
+                getSystemService(Context.TELEPHONY_SERVICE);
+        int networkType = mTelephonyManager.getNetworkType();
+        Log.d("network type : ", ""+networkType);
+        Log.d("LTE : ", ""+TelephonyManager.NETWORK_TYPE_LTE);
+
+        /*
+        4G -> 13 -> LTE
+        H+ -> 15 -> HSPA+
+        H -> 10 -> HSPA
+        EDGE -> 2
+        GPRS -> 1
+        GSM -> 16
+        NONE -> 0
+
+         */
     }
+    void checkPermission() {
+        int permission1 = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
+
+        // Check for permissions
+        if (permission1 != PackageManager.PERMISSION_GRANTED) {
+            Log.d("permission", "Requesting Permissions");
+
+            // Request permissions
+            ActivityCompat.requestPermissions(MainActivity.instance,
+                    new String[] {
+                            Manifest.permission.READ_PHONE_STATE
+                    }, 565);
+        }
+        else Log.d("permission", "Permissions Already Granted");
+    }
+
 
     void initializeUI() {
         green = new ColorStateList(
@@ -125,8 +173,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static void updateDashboard(int downSpeed) {
         if (!appPaused) {
-            nbBluetoothDevicesDisplay.setText(downSpeedToNetwork(downSpeed));
+            //nbBluetoothDevicesDisplay.setText(downSpeedToNetwork(downSpeed));
         }
+        instance.checkPermission();
+        TelephonyManager mTelephonyManager = (TelephonyManager)
+                instance.getSystemService(Context.TELEPHONY_SERVICE);
+        int networkType = mTelephonyManager.getNetworkType();
+        nbBluetoothDevicesDisplay.setText(""+networkType);
     }
 
     public static String downSpeedToNetwork(int downSpeed) {

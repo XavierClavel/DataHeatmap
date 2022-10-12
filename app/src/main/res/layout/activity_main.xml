@@ -41,6 +41,7 @@
             android:layout_centerInParent="true"
             android:gravity="center"
             android:text="-"
+            android:textColor="#C8C8C8"
             android:textSize="150sp" />
     </RelativeLayout>
 
@@ -48,6 +49,7 @@
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
         android:orientation="vertical">
 
         <Switch
@@ -72,8 +74,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
-                android:backgroundTint="#B85252"
                 android:layout_weight="1"
+                android:backgroundTint="#B85252"
                 android:text="stop" />
 
             <Button
@@ -82,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_weight="1"
-                android:backgroundTint="#919191"
+                android:backgroundTint="#C8C8C8"
                 android:text="write" />
         </LinearLayout>
 
