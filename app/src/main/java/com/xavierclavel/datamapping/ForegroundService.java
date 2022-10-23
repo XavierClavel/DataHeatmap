@@ -10,15 +10,12 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-
-import com.xavierclavel.datamapping.MainActivity;
 
 public class ForegroundService extends Service {
 
@@ -48,7 +45,7 @@ public class ForegroundService extends Service {
         scheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
         LocationJobService.shouldReschedule = true;
-        WiFiJobService.shouldReschedule = true;
+        MobileNetworkJobService.shouldReschedule = true;
         BluetoothJobService.shouldReschedule = true;
 
         Log.d("foreground service", "here");
@@ -73,7 +70,7 @@ public class ForegroundService extends Service {
 
     public static void scheduleJobWiFi() {
         Log.d("foreground service", "about to start job");
-        ComponentName serviceName = new ComponentName(instance, WiFiJobService.class);
+        ComponentName serviceName = new ComponentName(instance, MobileNetworkJobService.class);
         JobInfo jobInfo = new JobInfo.Builder(wiFiJobId, serviceName)
                 .setMinimumLatency(5000)
                 .build();
@@ -108,7 +105,7 @@ public class ForegroundService extends Service {
     public static void stopService() {
         instance.stopForeground(true);
         LocationJobService.shouldReschedule = false;
-        WiFiJobService.shouldReschedule = false;
+        MobileNetworkJobService.shouldReschedule = false;
         BluetoothJobService.shouldReschedule = false;
 
         instance.stopSelf();

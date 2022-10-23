@@ -53,7 +53,7 @@
         android:orientation="vertical">
 
         <Switch
-            android:id="@+id/switch1"
+            android:id="@+id/switch_keepData"
             android:layout_width="match_parent"
             android:layout_height="32dp"
             android:paddingHorizontal="30dp"
@@ -86,9 +86,17 @@
                 android:layout_weight="1"
                 android:backgroundTint="#C8C8C8"
                 android:text="write" />
+
         </LinearLayout>
 
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="bottom|center_horizontal"
+        android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -98,24 +106,46 @@
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
 
-
         <Button
-            android:id="@+id/buttonData"
+            android:id="@+id/buttonHistory"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginHorizontal="10dp"
             android:layout_weight="1"
             android:backgroundTint="#F18805"
-            android:text="data" />
+            android:maxHeight="48dip"
+            android:text="history" />
 
-        <Button
-            android:id="@+id/buttonMap"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            android:layout_weight="1"
-            android:backgroundTint="#F18805"
-            android:text="Map" />
     </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:gravity="bottom|center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+
+            <Button
+                android:id="@+id/buttonData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_weight="1"
+                android:backgroundTint="#F18805"
+                android:text="data" />
+
+            <Button
+                android:id="@+id/buttonMap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_weight="1"
+                android:backgroundTint="#F18805"
+                android:text="Map" />
+        </LinearLayout>
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

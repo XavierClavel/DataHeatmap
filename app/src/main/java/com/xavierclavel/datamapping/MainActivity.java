@@ -8,6 +8,7 @@ import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -38,6 +39,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ColorStateList green;
     ColorStateList red;
 
+    SharedPreferences mPrefs;
+    SharedPreferences.Editor mEditor;
+
+    public static boolean settings_keepData = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,12 +59,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.buttonWrite).setOnClickListener(this);
         buttonStop = findViewById(R.id.buttonStop);
         progressBar = findViewById(R.id.progressBar);
-        switchKeepData = findViewById(R.id.switch1);
+        switchKeepData = findViewById(R.id.switch_keepData);
 
         initializeUI();
 
+        switchKeepData.setOnClickListener(this);
         buttonStop.setOnClickListener(this);
         findViewById(R.id.buttonData).setOnClickListener(this);
+        findViewById(R.id.buttonHistory).setOnClickListener(this);
         instance = this;
         nbBluetoothDevicesDisplay = (TextView) instance.findViewById(R.id.nbBluetoothDevices);
         //Start foreground service that will schedule the various Jobs.
@@ -86,12 +94,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         4G -> 13 -> LTE
         H+ -> 15 -> HSPA+
         H -> 10 -> HSPA
+        3G -> 3 -> UMTS
         EDGE -> 2
         GPRS -> 1
         GSM -> 16
         NONE -> 0
 
          */
+
+        getLocalData();
+    }
+
+    void getLocalData() {
+        mPrefs = getSharedPreferences("label", 0);
+        mEditor = mPrefs.edit();
+
+        settings_keepData = mPrefs.getBoolean("keep_data", false);
+        switchKeepData.setChecked(settings_keepData);
+        if (settings_keepData) {
+            XmlManager.Read();
+        }
     }
     void checkPermission() {
         int permission1 = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
@@ -168,6 +190,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ContextCompat.startForegroundService(this, new Intent(this, ForegroundService.class));
                 }
                 break;
+
+            case R.id.buttonHistory:
+                Intent intent3 = new Intent(this, HistoryActivity.class);
+                startActivity(intent3);
+                break;
+
+            case R.id.switch_keepData:
+                mEditor.putBoolean("keep_data", switchKeepData.isChecked()).commit();
         }
     }
 
@@ -179,15 +209,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TelephonyManager mTelephonyManager = (TelephonyManager)
                 instance.getSystemService(Context.TELEPHONY_SERVICE);
         int networkType = mTelephonyManager.getNetworkType();
-        nbBluetoothDevicesDisplay.setText(""+networkType);
+        nbBluetoothDevicesDisplay.setText(DataActivity.technologyToNetwork(networkType));//com.xavierclavel.datamapping.networkType);
     }
 
-    public static String downSpeedToNetwork(int downSpeed) {
-        if (downSpeed > 20000) return "4G";
-        if (downSpeed > 14000) return "3G";
-        if (downSpeed > 10000) return "H+";
-        if (downSpeed > 100) return "H";
-        if (downSpeed > 50) return "E";
-        return "x";
-    }
+
 }

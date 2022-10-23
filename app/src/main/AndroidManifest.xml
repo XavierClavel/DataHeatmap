@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:allowBackup="true"
@@ -22,6 +22,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DataMapping">
+        <activity
+            android:name=".HistoryActivity"
+            android:exported="false" />
         <activity
             android:name=".DataActivity"
             android:exported="false" />
@@ -42,9 +45,9 @@
 
         <activity
             android:name=".MapActivity"
-            android:windowSoftInputMode="adjustResize"
             android:exported="false"
-            android:label="@string/title_activity_map" />
+            android:label="@string/title_activity_map"
+            android:windowSoftInputMode="adjustResize" />
 
         <service
             android:name=".ForegroundService"
@@ -56,7 +59,7 @@
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
-            android:name=".WiFiJobService"
+            android:name=".MobileNetworkJobService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service

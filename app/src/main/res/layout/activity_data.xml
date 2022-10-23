@@ -37,10 +37,34 @@
             android:text="-" />
 
         <TextView
+            android:id="@+id/networkTypeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Network technology :" />
+
+        <TextView
+            android:id="@+id/networkTypeDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="-" />
+
+        <TextView
+            android:id="@+id/networkDetailText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Network technology detail :" />
+
+        <TextView
+            android:id="@+id/networkDetailDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="-" />
+
+        <TextView
             android:id="@+id/downSpeedText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Network speed downlink :" />
+            android:text="Downstream bandwidth :" />
 
         <TextView
             android:id="@+id/downSpeedDisplay"
@@ -52,7 +76,7 @@
             android:id="@+id/upSpeedText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Network speed uplink :" />
+            android:text="Upstream bandwidth :" />
 
         <TextView
             android:id="@+id/upSpeedDisplay"

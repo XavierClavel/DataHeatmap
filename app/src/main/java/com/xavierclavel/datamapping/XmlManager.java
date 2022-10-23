@@ -1,12 +1,10 @@
 package com.xavierclavel.datamapping;
 
 import android.content.Context;
-import android.net.wifi.ScanResult;
 import android.util.Log;
 import android.util.Xml;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.maps.android.heatmaps.WeightedLatLng;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -21,8 +19,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +26,9 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import java.util.Calendar;
+import java.util.Date;
 
 public class XmlManager {
 
@@ -39,10 +38,15 @@ public class XmlManager {
     public static List<TimestampedData> dataMemory;
     static String xmlDebugFile;
 
-    public static void Memorize(LatLng position, int nbBluetoothDevices) {
+    public static void Memorize(LatLng position, int network) {
         dataMemory = dataMemory == null ? new ArrayList<>() : dataMemory;
-        dataMemory.add(new TimestampedData(getTimestamp(), position, nbBluetoothDevices));
+        dataMemory.add(new TimestampedData(getTimestamp(), position, network));
         Log.d("xml manager", "data written | total amount of data : " + dataMemory.size());
+
+        Date currentTime = Calendar.getInstance().getTime();
+        Log.d("time", currentTime.toString());
+
+        if (MainActivity.settings_keepData) Write();
     }
 
     public static void Write() {
@@ -67,59 +71,6 @@ public class XmlManager {
         }
     }
 
-    public static void printXML() {
-        try {
-            StringWriter writer = new StringWriter();
-            XmlSerializer serializer = Xml.newSerializer();
-            serializer.setOutput(writer);
-            serializer.startDocument(null, Boolean.TRUE);
-            writeStringData(serializer);  //reference variable or value variable
-            serializer.endDocument();
-            serializer.flush();
-            xmlDebugFile = writer.toString();
-            Log.d("xml manager", xmlDebugFile);
-        } catch (Exception e) {
-            Log.d("Xml manager", "failed to write data in xml file");
-        }
-    }
-
-    public static void writeStringData(XmlSerializer serializer) {
-        try {
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-            serializer.text("\n");
-            serializer.startTag("", "root");
-            serializer.text("\n");
-            for (TimestampedData timestampedData : dataMemory) {
-
-                serializer.startTag("", "measurement");
-                serializer.text("\n");
-
-                serializer.startTag("", "timestamp");
-                serializer.text(timestampedData.timestamp);
-                serializer.endTag("", "timestamp");
-                serializer.text("\n");
-
-                serializer.startTag("", "locationData");
-                serializer.text(timestampedData.position.toString());
-                serializer.endTag("", "locationData");
-                serializer.text("\n");
-
-                serializer.startTag("", "bluetoothData");
-                serializer.text("" + timestampedData.nbBluetoothDevices);
-                serializer.endTag("", "bluetoothData");
-                serializer.text("\n");
-
-                serializer.endTag("", "measurement");
-                serializer.text("\n");
-            }
-            serializer.endTag("", "root");
-            Log.d("xml manager", "successfully wrote data");
-        } catch (Exception e) {
-            Log.d("xml manager", "failed to write records on xml file");
-        }
-
-    }
-
     public static void writeData(XmlSerializer serializer) {
         try {
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
@@ -136,9 +87,9 @@ public class XmlManager {
                 serializer.text(timestampedData.position.toString());
                 serializer.endTag("", "locationData");
 
-                serializer.startTag("", "bluetoothData");
-                serializer.text("" + timestampedData.nbBluetoothDevices);
-                serializer.endTag("", "bluetoothData");
+                serializer.startTag("", "mobileNetworkData");
+                serializer.text("" + timestampedData.network);
+                serializer.endTag("", "mobileNetworkData");
 
                 serializer.endTag("", "measurement");
             }
@@ -208,11 +159,24 @@ public class XmlManager {
                 //for all elements in the document
                 Log.d("xml manager","Measurement " + i + " with timestamp " + timestamp);
                 //get all APs
-                NodeList aps= measure.getElementsByTagName("record");
-                for (int j = 0; j < aps.getLength(); j++){
-                    String ap = aps.item(j).getTextContent();
-                    Log.d("xml manager", " "+ap);
-                }
+                String network = measure.getElementsByTagName("mobileNetworkData").item(0).getTextContent();
+                Log.d("network", network);
+                int networkType =  Integer.parseInt(network);
+                String location = measure.getElementsByTagName("locationData").item(0).getTextContent();
+                Log.d("location", location);
+
+                location = location.substring(location.lastIndexOf("(") + 1, location.lastIndexOf(")"));
+
+                String[] latlong =  location.split(",");
+                double latitude = Double.parseDouble(latlong[0]);
+                double longitude = Double.parseDouble(latlong[1]);
+
+                LatLng position = new LatLng(latitude, longitude);
+
+                Log.d("latitude", ""+latitude);
+                Log.d("longitude", "" + longitude);
+
+                HeatmapManager.addDataPoint(position, networkType);
             }
             Log.d("xml parser", "successfully read data");
         } catch (ParserConfigurationException e) {

@@ -83,6 +83,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         HeatmapManager.tableRow_Hplus = findViewById(R.id.tableRow_Hplus);
         HeatmapManager.tableRow_H = findViewById(R.id.tableRow_H);
         HeatmapManager.tableRow_E = findViewById(R.id.tableRow_E);
+        HeatmapManager.tableRow_G = findViewById(R.id.tableRow_G);
+        HeatmapManager.tableRow_None = findViewById(R.id.tableRow_None);
 
         /*
         if (!HeatmapManager.is_4G_initialized) HeatmapManager.tableRow_4G.setVisibility(View.GONE);
