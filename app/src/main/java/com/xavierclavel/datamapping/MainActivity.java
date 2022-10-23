@@ -12,6 +12,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -24,6 +26,12 @@ import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -42,7 +50,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     SharedPreferences mPrefs;
     SharedPreferences.Editor mEditor;
 
+    boolean isMeasurementSaved = false;
+
     public static boolean settings_keepData = false;
+    public static int settings_idMeasurement = 0;
+
+    public static String cityName = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,11 +122,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mPrefs = getSharedPreferences("label", 0);
         mEditor = mPrefs.edit();
 
+        settings_idMeasurement = mPrefs.getInt("nb_measurements",0);
+
         settings_keepData = mPrefs.getBoolean("keep_data", false);
         switchKeepData.setChecked(settings_keepData);
-        if (settings_keepData) {
-            XmlManager.Read();
+        if (settings_keepData) {    //continue existing measurement
+            XmlManager.Read();      //access the data from the last measurement
         }
+        else settings_idMeasurement++;    //new measurement
     }
     void checkPermission() {
         int permission1 = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
@@ -171,7 +187,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.buttonWrite:
-                XmlManager.Write();
+                List<MeasurementSummary> measurementSummaries = XmlManager.ReadHistory();
+                String currentTime = Calendar.getInstance().getTime().toString();
+                String filename = "measurement" + settings_idMeasurement;
+                MeasurementSummary currentMeasurementSummary = new MeasurementSummary(currentTime, cityName, HeatmapManager.nbPoints+"", filename);
+                if (isMeasurementSaved) {
+                    measurementSummaries.set(measurementSummaries.size()-1,currentMeasurementSummary);
+                }
+                else measurementSummaries.add(currentMeasurementSummary);
+                XmlManager.WriteHistory(measurementSummaries);
+                isMeasurementSaved = true;
                 break;
 
             case R.id.buttonStop:
@@ -198,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.switch_keepData:
                 mEditor.putBoolean("keep_data", switchKeepData.isChecked()).commit();
+                settings_keepData = switchKeepData.isChecked();
         }
     }
 
@@ -210,6 +236,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 instance.getSystemService(Context.TELEPHONY_SERVICE);
         int networkType = mTelephonyManager.getNetworkType();
         nbBluetoothDevicesDisplay.setText(DataActivity.technologyToNetwork(networkType));//com.xavierclavel.datamapping.networkType);
+    }
+
+    public static void getCityName(LatLng position) {
+        Geocoder geoCoder = new Geocoder(instance, Locale.getDefault()); //it is Geocoder
+        StringBuilder builder = new StringBuilder();
+        try {
+            List<Address> addresses = geoCoder.getFromLocation(position.latitude, position.longitude,10);
+
+            for (Address adrs : addresses) {
+                if (adrs != null) {
+
+                    String locality = adrs.getLocality();
+                    if (locality != null && !locality.equals("")) {
+                        cityName = locality;
+                        Log.d("city", cityName);
+                        HeatmapManager.cityAcquired = true;
+                        break;
+                    }
+
+                }
+            }
+
+
+            Log.d("address", addresses.get(0).toString());
+            DataActivity.updateLocationData(addresses.get(0).toString());
+        } catch (IOException e) {Log.d("address", "failure");}
+        catch (NullPointerException e) {Log.d("address", "failure");}
     }
 
 

@@ -187,4 +187,109 @@ public class XmlManager {
             e.printStackTrace();
         }
     }
+
+    public static List<MeasurementSummary> ReadHistory() {
+
+
+        File dir = MainActivity.instance.getFilesDir();
+        File file = new File(dir, "history");
+        //boolean deleted = file.delete();
+        List<MeasurementSummary> measurementSummaries = new ArrayList<>();
+
+        Log.d("xml manager", "start reading data");
+        //Read data string from file
+        String data = readRawData("history");
+        InputStream is = null;
+        try {
+            is = new ByteArrayInputStream(data.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db;
+        NodeList items = null;
+        Document dom;
+        try {
+            db = dbf.newDocumentBuilder();
+            dom = db.parse(is);
+            dom.getDocumentElement().normalize();
+            //get all measurement tags
+            items = dom.getElementsByTagName("measurement");
+            Log.d("xml manager", "nb of xml measurements = " + items.getLength());
+            for (int i=0; i<items.getLength(); i++){
+                Element measure = (Element)items.item(i);
+                //get timestamp
+                String date = measure.getElementsByTagName("date").item(0).getTextContent();
+                String place = measure.getElementsByTagName("place").item(0).getTextContent();
+                String nbPoints = measure.getElementsByTagName("nbPoints").item(0).getTextContent();
+                String filename = measure.getElementsByTagName("filename").item(0).getTextContent();
+
+                measurementSummaries.add(new MeasurementSummary(date, place, nbPoints, filename));
+            }
+            Log.d("xml parser", "successfully read data");
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return measurementSummaries;
+    }
+
+    public static void WriteHistory(List<MeasurementSummary> measurementSummaries) {
+        Log.d("xml manager", "starting to write data");
+        //printXML();
+        try {
+            File dir = MainActivity.instance.getFilesDir();
+            File file = new File(dir, "history");
+            boolean deleted = file.delete();
+            Log.d("deleted", "" + deleted);
+            FileOutputStream fos = MainActivity.instance.openFileOutput("history", Context.MODE_APPEND);
+            XmlSerializer serializer = Xml.newSerializer();
+            serializer.setOutput(fos, "UTF-8"); //definit le fichier de sortie
+            serializer.startDocument("UTF-8", true);
+            writeDataHistory(serializer, measurementSummaries);  //reference variable or value variable
+            serializer.endDocument();
+            serializer.flush();
+            fos.close();
+            Log.d("xml manager", "end of writing operation");
+        } catch (Exception e) {
+            Log.d("Xml manager", "failed to write data in xml file");
+        }
+    }
+
+    public static void writeDataHistory(XmlSerializer serializer, List<MeasurementSummary> measurementSummaries) {
+        try {
+            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+            serializer.startTag("", "root");
+            for (MeasurementSummary measurementSummary : measurementSummaries) {
+
+                serializer.startTag("", "measurement");
+
+                serializer.startTag("", "date");
+                serializer.text(measurementSummary.date);
+                serializer.endTag("", "date");
+
+                serializer.startTag("", "place");
+                serializer.text(measurementSummary.place);
+                serializer.endTag("", "place");
+
+                serializer.startTag("", "nbPoints");
+                serializer.text(measurementSummary.nbPoints);
+                serializer.endTag("", "nbPoints");
+
+                serializer.startTag("","filename");
+                serializer.text(measurementSummary.filename);
+                serializer.endTag("", "filename");
+
+                serializer.endTag("", "measurement");
+            }
+            serializer.endTag("", "root");
+            Log.d("xml manager", "successfully wrote data");
+        } catch (Exception e) {
+            Log.d("xml manager", "failed to write records on xml file");
+        }
+
+    }
 }

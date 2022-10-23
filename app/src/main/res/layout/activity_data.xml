@@ -84,5 +84,17 @@
             android:layout_height="wrap_content"
             android:text="-" />
 
+        <TextView
+            android:id="@+id/locationDataText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Location Information :" />
+
+        <TextView
+            android:id="@+id/locationDataDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="-" />
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

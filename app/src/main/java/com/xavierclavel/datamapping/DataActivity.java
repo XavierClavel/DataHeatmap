@@ -23,12 +23,14 @@ public class DataActivity extends AppCompatActivity {
     static TextView mobileNetworkDisplay;
     static TextView networkTypeDisplay;
     static TextView networkDetailDisplay;
+    static TextView locationDataDisplay;
     public static LatLng lastLocation = null;
     static Integer lastDownSpeed = null;
     static Integer lastUpSpeed = null;
     static String lastMobileNetwork = null;
     static String lastNetworkType = null;
     static String lastNetworkDetail = null;
+    static String lastLocationData = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,7 @@ public class DataActivity extends AppCompatActivity {
         mobileNetworkDisplay = findViewById(R.id.mobileNetworkDisplay);
         networkTypeDisplay = findViewById(R.id.networkTypeDisplay);
         networkDetailDisplay = findViewById(R.id.networkDetailDisplay);
+        locationDataDisplay = findViewById(R.id.locationDataDisplay);
 
         activityInitialized = true;
         if (lastLocation != null) locationDisplay.setText(lastLocation.toString());
@@ -49,6 +52,7 @@ public class DataActivity extends AppCompatActivity {
         if (lastMobileNetwork != null) mobileNetworkDisplay.setText(lastMobileNetwork);
         if (lastNetworkType != null) networkTypeDisplay.setText(lastNetworkType);
         if (lastNetworkDetail != null) networkDetailDisplay.setText(lastNetworkDetail);
+        if (lastLocationData != null) locationDataDisplay.setText(lastLocationData);
     }
 
 
@@ -73,6 +77,12 @@ public class DataActivity extends AppCompatActivity {
 
         Log.d("network technology : ", networkTypeToString(networkType));
         networkTypeDisplay.setText(networkTypeToString(networkType));
+    }
+
+    public static void updateLocationData(String data) {
+        TextView locationDataDisplay = instance.findViewById(R.id.locationDataDisplay);
+        locationDataDisplay.setText(data);
+        lastLocationData = data;
     }
 
     static String networkTypeToString(int networkType) {

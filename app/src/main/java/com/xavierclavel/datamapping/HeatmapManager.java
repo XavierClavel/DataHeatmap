@@ -87,6 +87,9 @@ public class HeatmapManager {
     public static TableRow tableRow_G;
     public static TableRow tableRow_None;
 
+    public static int nbPoints = 0;
+    static boolean cityAcquired = false;
+
 
     public static void initializeHeatMap() {    //gets executed when the map is displayed
         if (is_4G_initialized) InitializeTileOverlay4G();  //display the 4G heatmap
@@ -229,6 +232,9 @@ public class HeatmapManager {
     }
 
     public static void locationDataSocket(LatLng latLng) {
+        if (!cityAcquired) {
+            MainActivity.getCityName(latLng);
+        }
         DataActivity.updateLocationDisplay(latLng);
         locationData = latLng;
         if (mobileNetworkDataDownlink != null) updateHeatmap();
@@ -250,6 +256,8 @@ public class HeatmapManager {
     }
 
     static void updateHeatmap() {
+        nbPoints ++;
+
         Log.d("heatmap manager", "new data point acquired");
         //Toast.makeText(ForegroundService.instance, "Data point acquired", Toast.LENGTH_LONG).show();
         XmlManager.Memorize(locationData, mobileNetworkDataType);
