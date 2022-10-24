@@ -2,6 +2,7 @@ package com.xavierclavel.datamapping;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -65,8 +66,8 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
         measurementSummaries = XmlManager.ReadHistory();
 
-        createLayout(new MeasurementSummary("13/10/2022 18:23", "Toulouse", "15", "a0"));
-        createLayout(new MeasurementSummary("13/10/2022 18:47", "Toulouse", "23", "a"));
+        //createLayout(new MeasurementSummary("13/10/2022 18:23", "Toulouse", "15", "a0"));
+        //createLayout(new MeasurementSummary("13/10/2022 18:47", "Toulouse", "23", "a"));
 
         for (MeasurementSummary measurementSummary : measurementSummaries) {
             createLayout(measurementSummary);
@@ -110,24 +111,30 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
         layout.addView(displayButton, paramsTopRight);
 
-        //dictionaryButtonToLayout.put(displayButton.getId(), layout);
-
         buttonList.add(displayButton);
         displayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (isDeleting) {
                     linLayout.removeView(layout);
+                    Log.d("measurement removed", measurementSummary.date);
                     measurementSummaries.remove(measurementSummary);
                     File dir = MainActivity.instance.getFilesDir();
                     File file = new File(dir, measurementSummary.filename);
                     boolean deleted = file.delete();
                     Log.d("file deleted", deleted+"");
                     XmlManager.WriteHistory(measurementSummaries);
-                    //TODO : delete file
                 }
                 else {
-                    //TODO : display on map
+                    List<TimestampedData> timestampedDataList = XmlManager.Read(measurementSummary.filename);
+                    Log.d("file opened", measurementSummary.filename);
+
+                    HistoryMapActivity.firstLocation = timestampedDataList.get(0).position;
+                    HistoryHeatmapManager.data = timestampedDataList;
+
+                    Intent intent = new Intent(HistoryActivity.this, HistoryMapActivity.class);
+                    startActivity(intent);
+
                 }
 
             }

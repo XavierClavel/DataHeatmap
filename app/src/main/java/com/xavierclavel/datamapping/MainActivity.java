@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -34,6 +35,8 @@ import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    //TODO : add button to start new measurement
 
     public static MainActivity instance;
     public static TextView nbBluetoothDevicesDisplay;
@@ -96,13 +99,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
 
-        checkPermission();
-        TelephonyManager mTelephonyManager = (TelephonyManager)
-                getSystemService(Context.TELEPHONY_SERVICE);
-        int networkType = mTelephonyManager.getNetworkType();
-        Log.d("network type : ", ""+networkType);
-        Log.d("LTE : ", ""+TelephonyManager.NETWORK_TYPE_LTE);
-
         /*
         4G -> 13 -> LTE
         H+ -> 15 -> HSPA+
@@ -123,11 +119,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mEditor = mPrefs.edit();
 
         settings_idMeasurement = mPrefs.getInt("nb_measurements",0);
+        Log.d("id", settings_idMeasurement+"");
+        if (settings_idMeasurement == 0) mEditor.putInt("nb_measurements", 0);
+        mEditor.commit();
 
         settings_keepData = mPrefs.getBoolean("keep_data", false);
+        Log.d("keep data", settings_keepData + "");
         switchKeepData.setChecked(settings_keepData);
         if (settings_keepData) {    //continue existing measurement
-            XmlManager.Read();      //access the data from the last measurement
+            List<TimestampedData> timestampedDataList = XmlManager.Read(XmlManager.defaultFilename);      //access the data from the last measurement
+            for (TimestampedData timestampedData: timestampedDataList) {
+                HeatmapManager.addDataPoint(timestampedData.position, timestampedData.network); //plot data
+            }
         }
         else settings_idMeasurement++;    //new measurement
     }
@@ -187,6 +190,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.buttonWrite:
+                if (HeatmapManager.nbPoints == 0) break;
+                Log.d("measurement already saved", isMeasurementSaved+"");
+                Log.d("current id", settings_idMeasurement+"");
                 List<MeasurementSummary> measurementSummaries = XmlManager.ReadHistory();
                 String currentTime = Calendar.getInstance().getTime().toString();
                 String filename = "measurement" + settings_idMeasurement;
@@ -194,8 +200,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (isMeasurementSaved) {
                     measurementSummaries.set(measurementSummaries.size()-1,currentMeasurementSummary);
                 }
-                else measurementSummaries.add(currentMeasurementSummary);
-                XmlManager.WriteHistory(measurementSummaries);
+                else {
+                    measurementSummaries.add(currentMeasurementSummary);
+                    mEditor.putInt("nb_measurements", settings_idMeasurement);
+                    mEditor.commit();
+                    Log.d("saved id",""+ mPrefs.getInt("nb_measurements", 999));
+                }
+                XmlManager.WriteHistory(measurementSummaries);  //write info detail about this measurement, including filename
+                XmlManager.Write(filename); //write the measurement in an xml file
                 isMeasurementSaved = true;
                 break;
 
@@ -223,19 +235,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.switch_keepData:
                 mEditor.putBoolean("keep_data", switchKeepData.isChecked()).commit();
+                mEditor.commit();
                 settings_keepData = switchKeepData.isChecked();
+                if (switchKeepData.isChecked()) XmlManager.Write(XmlManager.defaultFilename);   //save data
         }
     }
 
     public static void updateDashboard(int downSpeed) {
         if (!appPaused) {
             //nbBluetoothDevicesDisplay.setText(downSpeedToNetwork(downSpeed));
+
+            instance.checkPermission();
+            TelephonyManager mTelephonyManager = (TelephonyManager)
+                    instance.getSystemService(Context.TELEPHONY_SERVICE);
+            @SuppressLint("MissingPermission") int networkType = mTelephonyManager.getNetworkType();
+            nbBluetoothDevicesDisplay.setText(DataActivity.technologyToNetwork(networkType));//com.xavierclavel.datamapping.networkType);
         }
-        instance.checkPermission();
-        TelephonyManager mTelephonyManager = (TelephonyManager)
-                instance.getSystemService(Context.TELEPHONY_SERVICE);
-        int networkType = mTelephonyManager.getNetworkType();
-        nbBluetoothDevicesDisplay.setText(DataActivity.technologyToNetwork(networkType));//com.xavierclavel.datamapping.networkType);
     }
 
     public static void getCityName(LatLng position) {

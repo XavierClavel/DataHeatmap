@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.TableRow;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Tile;
 import com.google.android.gms.maps.model.TileOverlay;
@@ -90,8 +91,12 @@ public class HeatmapManager {
     public static int nbPoints = 0;
     static boolean cityAcquired = false;
 
+    public static GoogleMap map;
+
 
     public static void initializeHeatMap() {    //gets executed when the map is displayed
+        map = MapActivity.mMap;
+
         if (is_4G_initialized) InitializeTileOverlay4G();  //display the 4G heatmap
         if (is_3G_initialized) InitializeTileOverlay3G();  //display the 3G heatmap
         if (is_Hplus_initialized) InitializeTileOverlayHplus();
@@ -116,7 +121,7 @@ public class HeatmapManager {
                 .build();
 
         // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_4G = MapActivity.mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider_4G));
+        tileOverlay_4G = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_4G));
 
         tableRow_4G.setVisibility(View.VISIBLE);   //display legend
 
@@ -134,7 +139,7 @@ public class HeatmapManager {
                 .build();
 
         // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_3G = MapActivity.mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider_3G));
+        tileOverlay_3G = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_3G));
 
         tableRow_3G.setVisibility(View.VISIBLE);
 
@@ -152,7 +157,7 @@ public class HeatmapManager {
                 .build();
 
         // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_Hplus = MapActivity.mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider_Hplus));
+        tileOverlay_Hplus = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_Hplus));
 
         tableRow_Hplus.setVisibility(View.VISIBLE);
 
@@ -170,7 +175,7 @@ public class HeatmapManager {
                 .build();
 
         // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_H = MapActivity.mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider_H));
+        tileOverlay_H = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_H));
 
         tableRow_H.setVisibility(View.VISIBLE);
 
@@ -188,7 +193,7 @@ public class HeatmapManager {
                 .build();
 
         // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_E = MapActivity.mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider_E));
+        tileOverlay_E = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_E));
 
         tableRow_E.setVisibility(View.VISIBLE);
 
@@ -206,7 +211,7 @@ public class HeatmapManager {
                 .build();
 
         // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_G = MapActivity.mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider_G));
+        tileOverlay_G = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_G));
 
         tableRow_G.setVisibility(View.VISIBLE);
 
@@ -224,7 +229,7 @@ public class HeatmapManager {
                 .build();
 
         // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_None = MapActivity.mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider_None));
+        tileOverlay_None = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_None));
 
         tableRow_None.setVisibility(View.VISIBLE);
 
@@ -277,6 +282,7 @@ public class HeatmapManager {
         if (networkType == 13 || networkType == 20) update_4G_heatmap();
         if (networkType == 15) update_Hplus_heatmap();
         //if (networkType == 16) return "2G";
+        //TODO : 5G
     }
 
     static void update_4G_heatmap() {

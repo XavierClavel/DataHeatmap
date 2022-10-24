@@ -32,7 +32,9 @@ import java.util.Date;
 
 public class XmlManager {
 
-    static String filename = "scan_data";
+    //TODO : change affichage of date
+
+    static String defaultFilename = "scan_data";
     public static boolean autoUpdate = false;
 
     public static List<TimestampedData> dataMemory;
@@ -46,10 +48,10 @@ public class XmlManager {
         Date currentTime = Calendar.getInstance().getTime();
         Log.d("time", currentTime.toString());
 
-        if (MainActivity.settings_keepData) Write();
+        if (MainActivity.settings_keepData) Write(XmlManager.defaultFilename);
     }
 
-    public static void Write() {
+    public static void Write(String filename) {
         Log.d("xml manager", "starting to write data");
         //printXML();
         try {
@@ -130,7 +132,8 @@ public class XmlManager {
         return data;
     }
 
-    public static void Read() {
+    public static List<TimestampedData> Read(String filename) {
+        List<TimestampedData> timestampedDataList = new ArrayList<>();
         Log.d("xml manager", "start reading data");
         //Read data string from file
         String data = readRawData(filename);
@@ -176,7 +179,9 @@ public class XmlManager {
                 Log.d("latitude", ""+latitude);
                 Log.d("longitude", "" + longitude);
 
-                HeatmapManager.addDataPoint(position, networkType);
+                timestampedDataList.add(new TimestampedData(timestamp, position, networkType));
+
+                //HeatmapManager.addDataPoint(position, networkType);
             }
             Log.d("xml parser", "successfully read data");
         } catch (ParserConfigurationException e) {
@@ -186,6 +191,8 @@ public class XmlManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return timestampedDataList;
     }
 
     public static List<MeasurementSummary> ReadHistory() {
