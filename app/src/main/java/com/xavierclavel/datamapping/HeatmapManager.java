@@ -274,14 +274,15 @@ public class HeatmapManager {
     }
 
     public static void technologyToHeatmap(int networkType) {
+        Log.d("network type", networkType + "");
         if (networkType == 0) update_None_heatmap();
-        if (networkType == 1) update_G_heatmap();
-        if (networkType == 2) update_E_heatmap();
-        if (networkType <= 7 || networkType == 11 || networkType == 17) update_3G_heatmap();
-        if (networkType <= 10) update_H_heatmap();
-        if (networkType == 13 || networkType == 20) update_4G_heatmap();
-        if (networkType == 15) update_Hplus_heatmap();
-        //if (networkType == 16) return "2G";
+        else if (networkType == 1) update_G_heatmap();
+        else if (networkType == 2) update_E_heatmap();
+        else if (networkType <= 7 || networkType == 11 || networkType == 17) update_3G_heatmap();
+        else if (networkType <= 10) update_H_heatmap();
+        else if (networkType == 13 || networkType == 20) update_4G_heatmap();
+        else if (networkType == 15) update_Hplus_heatmap();
+        //else if (networkType == 16) return "2G";
         //TODO : 5G
     }
 
@@ -299,6 +300,7 @@ public class HeatmapManager {
     }
 
     static void update_3G_heatmap() {
+        Log.d("heatmap", "3G updated");
         if (data_3G == null) data_3G = new ArrayList<>();
         data_3G.add(locationData);
 
@@ -325,6 +327,7 @@ public class HeatmapManager {
     }
 
     static void update_H_heatmap() {
+        Log.d("heatmap", "H updated");
         if (data_H == null) data_H = new ArrayList<>();
         data_H.add(locationData);
 
@@ -338,6 +341,7 @@ public class HeatmapManager {
     }
 
     static void update_E_heatmap() {
+        Log.d("heatmap", "E updated");
         if (data_E == null) data_E = new ArrayList<>();
         data_E.add(locationData);
 
@@ -346,7 +350,7 @@ public class HeatmapManager {
             tileOverlay_E.clearTileCache();
         }
         else if (mapReady) {
-            InitializeTileOverlayH();
+            InitializeTileOverlayE();
         }
     }
 

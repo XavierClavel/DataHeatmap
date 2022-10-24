@@ -65,6 +65,9 @@ public class MobileNetworkJobService extends JobService  {
                 int downSpeed = nc.getLinkDownstreamBandwidthKbps();
                 int upSpeed = nc.getLinkUpstreamBandwidthKbps();
 
+                Log.d("network job ", "network type is " + networkType);
+                Log.d("network job ", "________________________________________________________________________");
+
                 HeatmapManager.mobileNetworkDataSocket(networkType, downSpeed, upSpeed);
 
             } catch (Exception e) {

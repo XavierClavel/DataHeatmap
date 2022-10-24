@@ -21,7 +21,6 @@ public class ForegroundService extends Service {
 
     public static JobScheduler scheduler;
     public static ForegroundService instance;
-    static int bluetoothJobId = 111;
     static int wiFiJobId = 112;
     static int locationJobId = 113;
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
@@ -46,26 +45,12 @@ public class ForegroundService extends Service {
 
         LocationJobService.shouldReschedule = true;
         MobileNetworkJobService.shouldReschedule = true;
-        BluetoothJobService.shouldReschedule = true;
 
         Log.d("foreground service", "here");
         // Lancer ici le job de monitoring dans une async task
-        //scheduleJobBluetooth();
         scheduleJobWiFi();
         scheduleJobLocation();
         return START_NOT_STICKY;
-    }
-
-    public static void scheduleJobBluetooth() {
-        Log.d("foreground service", "about to start bluetooth job");
-        ComponentName serviceName = new ComponentName(instance, BluetoothJobService.class);
-        JobInfo jobInfo = new JobInfo.Builder(bluetoothJobId, serviceName)
-                .setMinimumLatency(30000)
-                .build();
-        int result = scheduler.schedule(jobInfo);
-        if (result == JobScheduler.RESULT_SUCCESS) {
-            Log.d("foreground service", "success");
-        }
     }
 
     public static void scheduleJobWiFi() {
@@ -106,7 +91,6 @@ public class ForegroundService extends Service {
         instance.stopForeground(true);
         LocationJobService.shouldReschedule = false;
         MobileNetworkJobService.shouldReschedule = false;
-        BluetoothJobService.shouldReschedule = false;
 
         instance.stopSelf();
     }

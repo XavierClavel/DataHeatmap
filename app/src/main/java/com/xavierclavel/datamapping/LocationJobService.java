@@ -102,6 +102,7 @@ public class LocationJobService extends JobService {
                         // Logic to handle location object
                         Log.d("location", "user location is : " + location.toString());
                         LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
+                        Log.d("location job", "__________________________________________________________");
                         HeatmapManager.locationDataSocket(currentPosition);
                     }
                 }
@@ -112,6 +113,8 @@ public class LocationJobService extends JobService {
 
     void checkPermission() {
         int permission1 = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        int permission2 = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        int permission3 = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION);
 
         // Check for permissions
         if (permission1 != PackageManager.PERMISSION_GRANTED) {
@@ -119,10 +122,23 @@ public class LocationJobService extends JobService {
 
             // Request permissions
             ActivityCompat.requestPermissions(MainActivity.instance,
-                    new String[] {
-                            Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                    }, 565);
+                    new String[] {Manifest.permission.ACCESS_COARSE_LOCATION}, 565);
+        }
+
+        if (permission2 != PackageManager.PERMISSION_GRANTED) {
+            Log.d("permission", "Requesting Permissions");
+
+            // Request permissions
+            ActivityCompat.requestPermissions(MainActivity.instance,
+                    new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 567);
+        }
+
+        if (permission3 != PackageManager.PERMISSION_GRANTED) {
+            Log.d("permission", "Requesting Permissions");
+
+            // Request permissions
+            ActivityCompat.requestPermissions(MainActivity.instance,
+                    new String[] {Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 566);
         }
         else Log.d("permission", "Permissions Already Granted");
     }

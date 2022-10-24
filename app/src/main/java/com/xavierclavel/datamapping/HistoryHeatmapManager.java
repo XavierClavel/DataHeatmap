@@ -113,13 +113,13 @@ public class HistoryHeatmapManager {
 
     public static void technologyToHeatmap(int networkType) {
         if (networkType == 0) data_None.add(locationData);
-        if (networkType == 1) data_G.add(locationData);
-        if (networkType == 2) data_E.add(locationData);
-        if (networkType <= 7 || networkType == 11 || networkType == 17) data_3G.add(locationData);
-        if (networkType <= 10) data_H.add(locationData);
-        if (networkType == 13 || networkType == 20) data_4G.add(locationData);
-        if (networkType == 15) data_Hplus.add(locationData);
-        //if (networkType == 16) return "2G";
+        else if (networkType == 1) data_G.add(locationData);
+        else if (networkType == 2) data_E.add(locationData);
+        else if (networkType <= 7 || networkType == 11 || networkType == 17) data_3G.add(locationData);
+        else if (networkType <= 10) data_H.add(locationData);
+        else if (networkType == 13 || networkType == 20) data_4G.add(locationData);
+        else if (networkType == 15) data_Hplus.add(locationData);
+        //else if (networkType == 16) return "2G";
         //TODO : 5G
     }
 
