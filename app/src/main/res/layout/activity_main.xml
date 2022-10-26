@@ -16,23 +16,26 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyleHorizontal"
+            android:id="@+id/progressBarNormal"
+            style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
             android:layout_width="500dp"
             android:layout_height="500dp"
             android:layout_centerInParent="true"
             android:max="500"
             android:progress="0"
-            android:progressDrawable="@drawable/circular" />
+            android:visibility="invisible" />
 
         <ProgressBar
-            android:id="@+id/pppppprogressBar"
-            style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
+            android:id="@+id/progressBar"
+            android:layout_centerInParent="true"
             android:layout_width="500dp"
             android:layout_height="500dp"
-            android:layout_centerInParent="true"
-            android:indeterminateTint="#F18805"
-            android:progressTint="#00BCD4" />
+            android:indeterminate="false"
+            android:progressDrawable="@drawable/circular_progress_bar"
+            android:background="@drawable/circle_shape"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:max="100"
+            android:progress="65" />
 
         <TextView
             android:id="@+id/nbBluetoothDevices"

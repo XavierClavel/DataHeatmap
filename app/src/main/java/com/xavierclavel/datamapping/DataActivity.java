@@ -24,6 +24,8 @@ public class DataActivity extends AppCompatActivity {
     static TextView networkTypeDisplay;
     static TextView networkDetailDisplay;
     static TextView locationDataDisplay;
+    public static TextView nbPointsDisplay;
+
     public static LatLng lastLocation = null;
     static Integer lastDownSpeed = null;
     static Integer lastUpSpeed = null;
@@ -44,6 +46,7 @@ public class DataActivity extends AppCompatActivity {
         networkTypeDisplay = findViewById(R.id.networkTypeDisplay);
         networkDetailDisplay = findViewById(R.id.networkDetailDisplay);
         locationDataDisplay = findViewById(R.id.locationDataDisplay);
+        nbPointsDisplay = findViewById(R.id.nbPointsDisplay);
 
         activityInitialized = true;
         if (lastLocation != null) locationDisplay.setText(lastLocation.toString());
@@ -53,6 +56,7 @@ public class DataActivity extends AppCompatActivity {
         if (lastNetworkType != null) networkTypeDisplay.setText(lastNetworkType);
         if (lastNetworkDetail != null) networkDetailDisplay.setText(lastNetworkDetail);
         if (lastLocationData != null) locationDataDisplay.setText(lastLocationData);
+        nbPointsDisplay.setText("" + HeatmapManager.nbPoints);
     }
 
 

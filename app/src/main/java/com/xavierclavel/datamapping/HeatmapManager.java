@@ -51,9 +51,6 @@ public class HeatmapManager {
     static Integer mobileNetworkDataUplink;
     static Integer mobileNetworkDataType;
 
-    static final float minDistance = 20; //distance minimale entre deux points successifs pour éviter une concentration des points de données,
-    // qui doivent être répartis pour une meilleure visualisation
-
     static final float[] startPoints = {0.2f};
 
     static final int[] color_4G = {Color.rgb(102, 225, 0)};     //green
@@ -92,12 +89,27 @@ public class HeatmapManager {
     static boolean cityAcquired = false;
 
     public static GoogleMap map;
+    static final int minDistance = 5; //distance minimale entre deux points successifs
 
+    static LatLng lastPos = null;
+
+
+    static boolean areDistantEnough(LatLng locA, LatLng locB) {
+        if (locA == null || locB == null) return true;
+        float[] results = new float[3];
+        Location.distanceBetween(locA.latitude, locA.longitude, locB.latitude, locB.longitude, results);
+        float distance = results[0];
+        Log.d("distance bewteen points", ""+ distance);
+        return distance < minDistance;
+    }
 
     public static void initializeHeatMap() {    //gets executed when the map is displayed
         map = MapActivity.mMap;
 
-        if (is_4G_initialized) InitializeTileOverlay4G();  //display the 4G heatmap
+        if (is_4G_initialized) {
+            provider_4G.setData(data_4G);
+            tileOverlay_4G.clearTileCache();
+        }
         if (is_3G_initialized) InitializeTileOverlay3G();  //display the 3G heatmap
         if (is_Hplus_initialized) InitializeTileOverlayHplus();
         if (is_H_initialized) InitializeTileOverlayH();
@@ -251,17 +263,23 @@ public class HeatmapManager {
         mobileNetworkDataDownlink = downSpeed;
         mobileNetworkDataUplink = upSpeed;
         MainActivity.updateDashboard(mobileNetworkDataDownlink);    //A modifier
+
+        //if (areDistantEnough(locationData, ))
         if (locationData != null) updateHeatmap();
     }
 
     public static void addDataPoint(LatLng location, int networkType) {
+
         locationData = location;
         mobileNetworkDataType = networkType;
         updateHeatmap();
     }
 
     static void updateHeatmap() {
+        MainActivity.Animate();
+
         nbPoints ++;
+        if (DataActivity.nbPointsDisplay != null) DataActivity.nbPointsDisplay.setText(""+nbPoints);
 
         Log.d("heatmap manager", "new data point acquired");
         //Toast.makeText(ForegroundService.instance, "Data point acquired", Toast.LENGTH_LONG).show();

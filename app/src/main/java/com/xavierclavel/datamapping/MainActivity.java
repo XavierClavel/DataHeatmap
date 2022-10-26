@@ -19,7 +19,6 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Switch;
@@ -37,6 +36,9 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     //TODO : add button to start new measurement
+    //TODO : display number of data points
+    //TODO : prevent data points from being too close d > 5m to avoid having too much useless data
+    //TODO : use threads to read data from xml file to prevent blocking the app in case of large measurements
 
     public static MainActivity instance;
     public static TextView nbBluetoothDevicesDisplay;
@@ -45,10 +47,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static boolean appPaused = false;
     Button buttonStop;
-    ProgressBar progressBar;
+    static ProgressBar progressBar;
+    static ObjectAnimator animation;
     Switch switchKeepData;
-    ColorStateList green;
-    ColorStateList red;
+    static ColorStateList green;
+    static ColorStateList red;
 
     SharedPreferences mPrefs;
     SharedPreferences.Editor mEditor;
@@ -64,11 +67,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ProgressBar progressBar = findViewById(R.id.progressBar);
-        ObjectAnimator animation = ObjectAnimator.ofInt(progressBar, "progress", 0, 500); // see this max value coming back here, we animate towards that value
-        animation.setDuration(5000); // in milliseconds
-        animation.setInterpolator(new DecelerateInterpolator());
-        animation.start();
+
+        progressBar = findViewById(R.id.progressBar);
+        progressBar.setMax(1000);
+        animation = ObjectAnimator.ofInt(progressBar, "progress", 0, 1000); // see this max value coming back here, we animate towards that value
+
+
 
         Log.d("__________________________________________", "start");
         findViewById(R.id.buttonMap).setOnClickListener(this);
@@ -112,6 +116,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
          */
 
         getLocalData();
+
+        Animate();
+    }
+
+    public static void Animate()
+    {
+        animation.cancel();
+        progressBar.setProgress(0);
+        //progressBar.setBackgroundTintList(green);
+        animation.setDuration(5000); // in milliseconds
+        animation.start();
     }
 
     void getLocalData() {

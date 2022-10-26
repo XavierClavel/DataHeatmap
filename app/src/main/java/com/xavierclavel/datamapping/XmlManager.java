@@ -160,13 +160,13 @@ public class XmlManager {
                 //get timestamp
                 String timestamp = measure.getElementsByTagName("timestamp").item(0).getTextContent();
                 //for all elements in the document
-                Log.d("xml manager","Measurement " + i + " with timestamp " + timestamp);
+                //Log.d("xml manager","Measurement " + i + " with timestamp " + timestamp);
                 //get all APs
                 String network = measure.getElementsByTagName("mobileNetworkData").item(0).getTextContent();
-                Log.d("network", network);
+                //Log.d("network", network);
                 int networkType =  Integer.parseInt(network);
                 String location = measure.getElementsByTagName("locationData").item(0).getTextContent();
-                Log.d("location", location);
+                //Log.d("location", location);
 
                 location = location.substring(location.lastIndexOf("(") + 1, location.lastIndexOf(")"));
 
@@ -176,8 +176,8 @@ public class XmlManager {
 
                 LatLng position = new LatLng(latitude, longitude);
 
-                Log.d("latitude", ""+latitude);
-                Log.d("longitude", "" + longitude);
+                //Log.d("latitude", ""+latitude);
+                //Log.d("longitude", "" + longitude);
 
                 timestampedDataList.add(new TimestampedData(timestamp, position, networkType));
 
