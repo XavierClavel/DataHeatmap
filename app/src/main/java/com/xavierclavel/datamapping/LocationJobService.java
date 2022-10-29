@@ -2,6 +2,7 @@ package com.xavierclavel.datamapping;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.bluetooth.BluetoothAdapter;
@@ -57,6 +58,7 @@ public class LocationJobService extends JobService {
     public boolean onStopJob(JobParameters params) {
         Log.d("location job", "onStopJob id=" + params.getJobId());
 // ***** Arrêter le thread du job ici ******
+
         return shouldReschedule;
     }
 
@@ -75,11 +77,12 @@ public class LocationJobService extends JobService {
                 Log.d("wifi job", "failed to read location data");
             } finally {
                 LocationJobService.instance.jobFinished(LocationJobService.locationJobParameters, LocationJobService.shouldReschedule);
-                if (shouldReschedule) ForegroundService.scheduleJobLocation();
+                ForegroundService.JobLocationOver();
             }
             return "Done";
         }
 
+        @SuppressLint("MissingPermission")
         void getLocationData() {
             checkPermission();
 

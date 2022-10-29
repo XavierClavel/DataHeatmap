@@ -137,6 +137,7 @@ public class XmlManager {
         Log.d("xml manager", "start reading data");
         //Read data string from file
         String data = readRawData(filename);
+
         //String data = xmlDebugFile;
         InputStream is = null;
         try {
@@ -163,10 +164,10 @@ public class XmlManager {
                 //Log.d("xml manager","Measurement " + i + " with timestamp " + timestamp);
                 //get all APs
                 String network = measure.getElementsByTagName("mobileNetworkData").item(0).getTextContent();
-                //Log.d("network", network);
+                Log.d("network", network);
                 int networkType =  Integer.parseInt(network);
                 String location = measure.getElementsByTagName("locationData").item(0).getTextContent();
-                //Log.d("location", location);
+                Log.d("location", location);
 
                 location = location.substring(location.lastIndexOf("(") + 1, location.lastIndexOf(")"));
 
@@ -176,12 +177,11 @@ public class XmlManager {
 
                 LatLng position = new LatLng(latitude, longitude);
 
-                //Log.d("latitude", ""+latitude);
-                //Log.d("longitude", "" + longitude);
+                Log.d("latitude", ""+latitude);
+                Log.d("longitude", "" + longitude);
 
                 timestampedDataList.add(new TimestampedData(timestamp, position, networkType));
 
-                //HeatmapManager.addDataPoint(position, networkType);
             }
             Log.d("xml parser", "successfully read data");
         } catch (ParserConfigurationException e) {
@@ -193,6 +193,8 @@ public class XmlManager {
         }
 
         return timestampedDataList;
+
+
     }
 
     public static List<MeasurementSummary> ReadHistory() {

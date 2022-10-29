@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 public class ForegroundService extends Service {
 
@@ -24,6 +25,13 @@ public class ForegroundService extends Service {
     static int wiFiJobId = 112;
     static int locationJobId = 113;
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
+    static boolean isjobLocationOver = false;
+    static boolean isMobileNetworkJobOver = false;
+    static boolean shouldReschedule = true;
+    static PendingIntent pendingIntent;
+
+    public static String notificationTitle = "Scanning in progress...";
+    public static int notificationData;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -32,28 +40,50 @@ public class ForegroundService extends Service {
         String input = intent.getStringExtra("inputExtra");
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.app_icon)
                 .setContentTitle("Foreground Service")
-                .setContentText(input)
+                .setContentText("hello world")
                 .setContentIntent(pendingIntent)
                 .build();
         startForeground(1, notification);
         //do heavy work on a background thread
 
+        notificationTitle = "Scanning in progress...";
+        updateNotification();
+
         scheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
-        LocationJobService.shouldReschedule = true;
-        MobileNetworkJobService.shouldReschedule = true;
+        shouldReschedule = true;
 
         Log.d("foreground service", "here");
         // Lancer ici le job de monitoring dans une async task
-        scheduleJobWiFi();
-        scheduleJobLocation();
+        scheduleJobs();
         return START_NOT_STICKY;
     }
 
-    public static void scheduleJobWiFi() {
+    public static void updateNotification() {
+        Notification notification = new NotificationCompat.Builder(instance, CHANNEL_ID)
+                .setSmallIcon(R.drawable.app_icon)
+                .setContentTitle(notificationTitle)
+                .setContentText(HeatmapManager.nbPoints + " measurements")
+                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .build();
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(instance);
+
+        notificationManager.notify(1, notification);
+    }
+
+    public static void scheduleJobs(){
+        MainActivity.Animate();
+        scheduleJobWiFi();
+        scheduleJobLocation();
+    }
+
+    public static void scheduleJobWiFi() {  //TODO : rename
         Log.d("foreground service", "about to start job");
         ComponentName serviceName = new ComponentName(instance, MobileNetworkJobService.class);
         JobInfo jobInfo = new JobInfo.Builder(wiFiJobId, serviceName)
@@ -77,6 +107,30 @@ public class ForegroundService extends Service {
         }
     }
 
+    public static void JobMobileNetworkOver() {
+        if (isjobLocationOver) {
+            isjobLocationOver = false;
+            if (shouldReschedule) {
+                scheduleJobs();
+            }
+        }
+        else {
+            isMobileNetworkJobOver = true;
+        }
+    }
+
+    public static void JobLocationOver() {
+        if (isMobileNetworkJobOver) {
+            isMobileNetworkJobOver = false;
+            if (shouldReschedule) {
+                scheduleJobs();
+            }
+        }
+        else {
+            isjobLocationOver = true;
+        }
+    }
+
     public static void displayToast() {
         Toast.makeText(instance, "scan successful", Toast.LENGTH_LONG).show();
     }
@@ -89,8 +143,7 @@ public class ForegroundService extends Service {
 
     public static void stopService() {
         instance.stopForeground(true);
-        LocationJobService.shouldReschedule = false;
-        MobileNetworkJobService.shouldReschedule = false;
+        shouldReschedule = false;
 
         instance.stopSelf();
     }

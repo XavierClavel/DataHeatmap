@@ -4,7 +4,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
-        <item name="android:backgroundTint">#000000</item>
+        <item name="android:backgroundTint">#F18805</item>
         <item name="android:textColor">#FFFFFF</item>
     </style>
 </resources>

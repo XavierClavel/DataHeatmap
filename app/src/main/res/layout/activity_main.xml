@@ -16,16 +16,6 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ProgressBar
-            android:id="@+id/progressBarNormal"
-            style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
-            android:layout_width="500dp"
-            android:layout_height="500dp"
-            android:layout_centerInParent="true"
-            android:max="500"
-            android:progress="0"
-            android:visibility="invisible" />
-
-        <ProgressBar
             android:id="@+id/progressBar"
             android:layout_centerInParent="true"
             android:layout_width="500dp"
@@ -34,18 +24,52 @@
             android:progressDrawable="@drawable/circular_progress_bar"
             android:background="@drawable/circle_shape"
             style="?android:attr/progressBarStyleHorizontal"
-            android:max="100"
+            android:max="1000"
+            android:visibility="invisible"
             android:progress="65" />
 
+        <ProgressBar
+            android:id="@+id/progressBarIdle"
+            android:layout_centerInParent="true"
+            android:layout_width="500dp"
+            android:layout_height="500dp"
+            android:indeterminate="true"
+            android:indeterminateDrawable="@drawable/idle_progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:max="1000"
+            android:visibility="visible"
+            android:progress="20" />
+
         <TextView
-            android:id="@+id/nbBluetoothDevices"
+            android:id="@+id/networkDisplay"
             android:layout_width="match_parent"
             android:layout_height="500dp"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:text="-"
+            android:text=""
             android:textColor="#C8C8C8"
             android:textSize="150sp" />
+
+    <RelativeLayout
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true">
+
+            <ImageButton
+                android:id="@+id/buttonPlay"
+                android:translationX="8dp"
+                android:scaleType="fitXY"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_weight="1"
+                android:visibility="visible"
+                android:backgroundTint="#00FFFFFF"
+                app:tint="#C8C8C8"
+                app:srcCompat="@drawable/ic_play" />
+
+    </RelativeLayout>
+
     </RelativeLayout>
 
     <LinearLayout
@@ -60,35 +84,72 @@
             android:layout_width="match_parent"
             android:layout_height="32dp"
             android:paddingHorizontal="30dp"
+            android:visibility="gone"
             android:text="Keep data" />
 
         <LinearLayout
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="top|center"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
+            android:visibility="invisible"
             tools:layout_editor_absoluteY="550dp">
 
-
-            <Button
-                android:id="@+id/buttonStop"
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/buttonPause"
+                android:layout_marginHorizontal="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="10dp"
                 android:layout_weight="1"
+                android:background="@drawable/button_empty"
                 android:backgroundTint="#B85252"
-                android:text="stop" />
+                android:minHeight="50dp"
+                android:visibility="visible"
+                app:srcCompat="@drawable/pause"
+                app:tint="#B85252" />
 
-            <Button
-                android:id="@+id/buttonWrite"
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/buttonStop"
+                android:layout_marginHorizontal="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="10dp"
                 android:layout_weight="1"
+                android:background="@drawable/button_empty"
+                android:backgroundTint="#B85252"
+                android:minHeight="50dp"
+                android:visibility="gone"
+                app:srcCompat="@drawable/stop"
+                app:tint="#B85252" />
+
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/buttonWrite"
+                android:layout_marginHorizontal="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_empty"
                 android:backgroundTint="#C8C8C8"
-                android:text="write" />
+                android:minHeight="50dp"
+                android:visibility="visible"
+                app:srcCompat="@drawable/disk"
+                app:tint="#C8C8C8" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/buttonDownload"
+                android:layout_marginHorizontal="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_empty"
+                android:backgroundTint="#B85252"
+                android:minHeight="50dp"
+                android:visibility="visible"
+                app:srcCompat="@drawable/download"
+                app:tint="#B85252" />
 
         </LinearLayout>
 
@@ -98,28 +159,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:foregroundTint="#FF0000"
         android:gravity="bottom|center_horizontal"
         android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:gravity="bottom|center"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <Button
-            android:id="@+id/buttonHistory"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginHorizontal="10dp"
-            android:layout_weight="1"
-            android:backgroundTint="#F18805"
-            android:maxHeight="48dip"
-            android:text="history" />
-
-    </LinearLayout>
+        <TextView
+            android:id="@+id/nbMeasurementsDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
+            android:text=""
+            android:textColor="#FF9800" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -129,25 +180,47 @@
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent">
 
-
-            <Button
+            <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/buttonData"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_weight="1"
-                android:backgroundTint="#F18805"
-                android:text="data" />
+                android:background="@drawable/button_empty"
+                android:foregroundTint="#FF9800"
+                android:minHeight="50dp"
+                android:visibility="visible"
+                app:srcCompat="@drawable/info"
+                app:tint="#FF9800" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/buttonHistory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/button_empty"
+                android:foregroundTint="#FF9800"
+                android:minHeight="50dp"
+                android:visibility="visible"
+                app:srcCompat="@drawable/history"
+                app:tint="#FF9800" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/buttonMap"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_weight="1"
-                android:backgroundTint="#F18805"
-                android:text="Map" />
+                android:background="@drawable/button_empty"
+                android:minHeight="50dp"
+                android:visibility="visible"
+                app:srcCompat="@drawable/map"
+                app:tint="#FF9800" />
+
         </LinearLayout>
+
+
     </LinearLayout>
 
 

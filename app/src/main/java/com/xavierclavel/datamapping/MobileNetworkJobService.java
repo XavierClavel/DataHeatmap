@@ -43,6 +43,7 @@ public class MobileNetworkJobService extends JobService  {
     public boolean onStopJob(JobParameters params) {
         Log.d("wifi job", "onStopJob id=" + params.getJobId());
 // ***** Arrêter le thread du job ici ******
+
         return shouldReschedule;
     }
 
@@ -74,7 +75,8 @@ public class MobileNetworkJobService extends JobService  {
                 Log.d("wifi job", "failed to read wifi data");
             } finally {
                 MobileNetworkJobService.instance.jobFinished(MobileNetworkJobService.wifiJobParameters, MobileNetworkJobService.shouldReschedule);
-                if (shouldReschedule) ForegroundService.scheduleJobWiFi();
+                //if (shouldReschedule) ForegroundService.scheduleJobWiFi();
+                ForegroundService.JobMobileNetworkOver();
             }
             return "Done";
         }

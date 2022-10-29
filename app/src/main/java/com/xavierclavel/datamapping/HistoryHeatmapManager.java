@@ -66,6 +66,8 @@ public class HistoryHeatmapManager {
 
     public static GoogleMap map;
 
+    //TODO : use the MobileNetworkHandler class
+
     public static void initializeHeatMap() {    //gets executed when the map is displayed
         map = HistoryMapActivity.mMap;
 

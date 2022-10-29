@@ -8,9 +8,11 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Xml;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -23,18 +25,21 @@ import java.util.List;
 public class HistoryActivity extends AppCompatActivity implements View.OnClickListener {
 
     LinearLayout linLayout;
-    RelativeLayout.LayoutParams paramsTopRight;
+    RelativeLayout.LayoutParams paramsRight;
     ColorStateList orange;
     ColorStateList red;
     ColorStateList green;
     List<MeasurementSummary> measurementSummaries;
-    List<Button> buttonList;
-    Button buttonDelete;
+    List<ImageButton> buttonList;
+    ImageButton buttonDelete;
 
     HashMap<Integer,RelativeLayout> dictionaryButtonToLayout = new HashMap<>();
     HashMap<Integer,MeasurementSummary> dictionaryButtonToObject = new HashMap<>();
 
     boolean isDeleting = false;
+
+    ImageView bottomImageView;
+    ImageView previousBottomImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +48,9 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
         linLayout = findViewById(R.id.historyLayout);
 
-        paramsTopRight = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        paramsTopRight.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
-        paramsTopRight.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+        paramsRight = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        paramsRight.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+        paramsRight.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
 
         buttonList = new ArrayList<>();
         buttonDelete = findViewById(R.id.buttonDelete);
@@ -66,17 +71,32 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
         measurementSummaries = XmlManager.ReadHistory();
 
-        //createLayout(new MeasurementSummary("13/10/2022 18:23", "Toulouse", "15", "a0"));
-        //createLayout(new MeasurementSummary("13/10/2022 18:47", "Toulouse", "23", "a"));
-
         for (MeasurementSummary measurementSummary : measurementSummaries) {
             createLayout(measurementSummary);
         }
-
+        if (previousBottomImageView != null) previousBottomImageView.setVisibility(View.VISIBLE);
+        if (bottomImageView != null) {
+            bottomImageView.setVisibility(View.INVISIBLE);
+            previousBottomImageView = bottomImageView;
+            bottomImageView = null;
+        }
     }
 
 
     void createLayout(MeasurementSummary measurementSummary) {
+
+        LinearLayout.LayoutParams textParam = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                2f
+        );
+
+        LinearLayout.LayoutParams buttonParam = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                8f
+        );
+
         String date = measurementSummary.date;
         String place = measurementSummary.place;
         String nbPoints = measurementSummary.nbPoints;
@@ -84,8 +104,14 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
         RelativeLayout layout = new RelativeLayout(HistoryActivity.this);
         layout.setPadding(20, 20, 20, 20);
 
+        LinearLayout layout1 = new LinearLayout(this);
+        layout1.setOrientation(LinearLayout.HORIZONTAL);
+
+        layout.addView(layout1);
+
         LinearLayout localLinLayout = new LinearLayout(HistoryActivity.this);
         localLinLayout.setOrientation(LinearLayout.VERTICAL);
+        localLinLayout.setLayoutParams(textParam);
 
         TextView dateDisplay = new TextView(HistoryActivity.this);
         dateDisplay.setText(date);
@@ -101,15 +127,23 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
         nbPointsDisplay.setText(nbPoints + " measurements");
         localLinLayout.addView(nbPointsDisplay);
 
-        layout.addView(localLinLayout);
+        layout1.addView(localLinLayout);
 
-        Button displayButton = new Button(HistoryActivity.this);
+        LinearLayout buttonLayout = new LinearLayout(this);
+        buttonLayout.setLayoutParams(buttonParam);
+
+        ImageButton displayButton = new ImageButton(HistoryActivity.this);
         Log.d("button id", displayButton.getId() + "");
-        displayButton.setText("Display");
+        displayButton.setBackgroundResource(R.drawable.button_empty);
         displayButton.setBackgroundTintList(orange);
-        displayButton.setTextColor(Color.rgb(0,0,0));
+        displayButton.setImageResource(R.drawable.map);
+        displayButton.setImageTintList(orange);
+        displayButton.setMinimumWidth(200);
+        buttonLayout.setGravity(Gravity.CENTER);
 
-        layout.addView(displayButton, paramsTopRight);
+        //layout.addView(displayButton, paramsRight);
+        layout1.addView(buttonLayout);
+        buttonLayout.addView(displayButton);
 
         buttonList.add(displayButton);
         displayButton.setOnClickListener(new View.OnClickListener() {
@@ -142,6 +176,14 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
 
         linLayout.addView(layout);
+
+        ImageView image = new ImageView(this);  //separator
+        image.setImageResource(R.drawable.line);
+        image.setPadding(150,0,150,0);
+        image.setImageTintList(orange);
+        linLayout.addView(image);
+
+        bottomImageView = image;
 }
 
 
@@ -151,20 +193,24 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
         if (view.getId() == R.id.buttonDelete) {
             if (isDeleting) {
                 isDeleting = false;
-                buttonDelete.setText("delete");
+                buttonDelete.setImageResource(R.drawable.trash);
                 buttonDelete.setBackgroundTintList(red);
-                for (Button button : buttonList) {
-                    button.setText("display");
+                buttonDelete.setImageTintList(red);
+                for (ImageButton button : buttonList) {
+                    button.setImageResource(R.drawable.map);
                     button.setBackgroundTintList(orange);
+                    button.setImageTintList(orange);
                 }
             }
             else {
                 isDeleting = true;
-                buttonDelete.setText("done");
+                buttonDelete.setImageResource(R.drawable.check);
                 buttonDelete.setBackgroundTintList(green);
-                for (Button button : buttonList) {
-                    button.setText("delete");
+                buttonDelete.setImageTintList(green);
+                for (ImageButton button : buttonList) {
+                    button.setImageResource(R.drawable.trash);
                     button.setBackgroundTintList(red);
+                    button.setImageTintList(red);
                 }
             }
         }

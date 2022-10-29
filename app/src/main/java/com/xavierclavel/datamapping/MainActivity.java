@@ -19,9 +19,8 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -35,23 +34,27 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    //TODO : add button to start new measurement
-    //TODO : display number of data points
     //TODO : prevent data points from being too close d > 5m to avoid having too much useless data
     //TODO : use threads to read data from xml file to prevent blocking the app in case of large measurements
+    //TODO : set map in dark mode ?
 
     public static MainActivity instance;
-    public static TextView nbBluetoothDevicesDisplay;
+    public static TextView networkDisplay;
 
     public static FusedLocationProviderClient fusedLocationClient;
 
     public static boolean appPaused = false;
-    Button buttonStop;
+
+    ImageButton buttonPause;
+    ImageButton buttonStop;
+    ImageButton buttonStart;
+    ImageButton buttonDownload;
+    ImageButton buttonWrite;
     static ProgressBar progressBar;
+    static ProgressBar idleProgressBar;
     static ObjectAnimator animation;
-    Switch switchKeepData;
-    static ColorStateList green;
-    static ColorStateList red;
+    public static TextView nbMeasurementsDisplay;
+
 
     SharedPreferences mPrefs;
     SharedPreferences.Editor mEditor;
@@ -63,34 +66,63 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static String cityName = "";
 
+    static ColorStateList green = new ColorStateList(
+                new int[][]{new int[]{android.R.attr.state_enabled}},
+            new int[] {Color.rgb(139,195,74)}
+        );
+
+    static ColorStateList red = new ColorStateList(
+                new int[][]{new int[]{android.R.attr.state_enabled}},
+            new int[] {Color.rgb(184,82,82)}
+        );
+
+    static ColorStateList writeStateList = new ColorStateList(
+            new int[][]{
+                    new int[]{android.R.attr.state_enabled},
+                    new int[] {android.R.attr.state_pressed}
+            },
+
+            new int[] {
+                    Color.rgb(200,200,200),
+                    Color.rgb(139,195,74)
+            }
+    );
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         progressBar = findViewById(R.id.progressBar);
-        progressBar.setMax(1000);
+        idleProgressBar = findViewById(R.id.progressBarIdle);
         animation = ObjectAnimator.ofInt(progressBar, "progress", 0, 1000); // see this max value coming back here, we animate towards that value
 
-
-
         Log.d("__________________________________________", "start");
-        findViewById(R.id.buttonMap).setOnClickListener(this);
-        findViewById(R.id.buttonWrite).setOnClickListener(this);
+        buttonPause = findViewById(R.id.buttonPause);
         buttonStop = findViewById(R.id.buttonStop);
+        buttonDownload = findViewById(R.id.buttonDownload);
+        buttonWrite = findViewById(R.id.buttonWrite);
         progressBar = findViewById(R.id.progressBar);
-        switchKeepData = findViewById(R.id.switch_keepData);
+        buttonStart = findViewById(R.id.buttonPlay);
 
-        initializeUI();
+        nbMeasurementsDisplay = findViewById(R.id.nbMeasurementsDisplay);
+        networkDisplay = findViewById(R.id.networkDisplay);
 
-        switchKeepData.setOnClickListener(this);
+        buttonPause.setOnClickListener(this);
         buttonStop.setOnClickListener(this);
+        buttonDownload.setOnClickListener(this);
+        buttonWrite.setOnClickListener(this);
+        buttonStart.setOnClickListener(this);
         findViewById(R.id.buttonData).setOnClickListener(this);
         findViewById(R.id.buttonHistory).setOnClickListener(this);
+        findViewById(R.id.buttonMap).setOnClickListener(this);
+
+        buttonWrite.setBackgroundTintList(writeStateList);
+        buttonWrite.setImageTintList(writeStateList);
+
         instance = this;
-        nbBluetoothDevicesDisplay = (TextView) instance.findViewById(R.id.nbBluetoothDevices);
         //Start foreground service that will schedule the various Jobs.
-        ContextCompat.startForegroundService(this, new Intent(this, ForegroundService.class));
         Log.d("main activity", "initiated");
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -117,6 +149,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         getLocalData();
 
+    }
+
+    void StartMeasurements() {
+        ContextCompat.startForegroundService(this, new Intent(this, ForegroundService.class));
         Animate();
     }
 
@@ -124,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         animation.cancel();
         progressBar.setProgress(0);
-        //progressBar.setBackgroundTintList(green);
         animation.setDuration(5000); // in milliseconds
         animation.start();
     }
@@ -138,12 +173,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (settings_idMeasurement == 0) mEditor.putInt("nb_measurements", 0);
         mEditor.commit();
 
+        //settings_keepData = false;
         settings_keepData = mPrefs.getBoolean("keep_data", false);
         Log.d("keep data", settings_keepData + "");
-        switchKeepData.setChecked(settings_keepData);
         if (settings_keepData) {    //continue existing measurement
+            buttonDownload.setBackgroundTintList(green);    //change color to reflect the parameter
+            buttonDownload.setImageTintList(green);
             List<TimestampedData> timestampedDataList = XmlManager.Read(XmlManager.defaultFilename);      //access the data from the last measurement
             for (TimestampedData timestampedData: timestampedDataList) {
+                Log.d("previous data", timestampedData.position + " " + timestampedData.network);
                 HeatmapManager.addDataPoint(timestampedData.position, timestampedData.network); //plot data
             }
         }
@@ -165,35 +203,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else Log.d("permission", "Permissions Already Granted");
     }
 
-
-    void initializeUI() {
-        green = new ColorStateList(
-                new int[][]{new int[]{android.R.attr.state_enabled}},
-                new int[] {Color.rgb(139,195,74)}
-        );
-
-        red = new ColorStateList(
-                new int[][]{new int[]{android.R.attr.state_enabled}},
-                new int[] {Color.rgb(184,82,82)}
-        );
-
-        ColorStateList buttonStates = new ColorStateList(
-                new int[][]{
-                        new int[]{android.R.attr.state_checked},
-                        new int[]{}
-                },
-                new int[]{
-                        Color.rgb(139,195,74),
-                        Color.rgb(184,82,82)
-                }
-        );
-        switchKeepData.getThumbDrawable().setTintList(buttonStates);
-        switchKeepData.getTrackDrawable().setTintList(buttonStates);
-
-    }
-
     public void onClick(View view) {
         switch(view.getId()) {
+            case R.id.buttonPlay:
+                findViewById(R.id.top_bar).setVisibility(View.VISIBLE);
+                buttonStart.setVisibility(View.INVISIBLE);
+                buttonStop.setVisibility(View.GONE);
+                buttonPause.setVisibility(View.VISIBLE);
+                networkDisplay.setVisibility(View.VISIBLE);
+
+                appPaused = false;
+                idleProgressBar.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
+
+                //TODO : set image to pause icon
+                networkDisplay.setText("-");
+
+                StartMeasurements();
+
+                break;
             case R.id.buttonMap:
                 Intent intent = new Intent(this, MapActivity.class);
                 startActivity(intent);
@@ -203,6 +231,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Intent intent2 = new Intent(this, DataActivity.class);
                 startActivity(intent2);
                 break;
+
+
 
             case R.id.buttonWrite:
                 if (HeatmapManager.nbPoints == 0) break;
@@ -226,21 +256,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 isMeasurementSaved = true;
                 break;
 
+            case R.id.buttonPause:
+                buttonPause.setVisibility(View.GONE);
+                buttonStop.setVisibility(View.VISIBLE);
+                appPaused = true;
+                progressBar.setVisibility(View.INVISIBLE);  //change visible progress bar to show idle state
+                idleProgressBar.setVisibility(View.VISIBLE);
+                networkDisplay.setVisibility(View.INVISIBLE);
+
+                buttonStart.setVisibility(View.VISIBLE);
+                //TODO : set image to stop icon
+
+                progressBar.setProgress(0);
+                animation.cancel();
+
+                networkDisplay.setText("");
+
+                ForegroundService.stopService();
+                ForegroundService.notificationTitle = "Scanning paused";
+                ForegroundService.updateNotification();
+                break;
+
             case R.id.buttonStop:
-                appPaused = !appPaused;
-                if (appPaused) {
-                    buttonStop.setBackgroundTintList(green);
-                    nbBluetoothDevicesDisplay.setText("x");
-                    buttonStop.setText("start");
-                    //progressBar.getProgressDrawable().setColorFilter(Color.RED, android.graphics.PorterDuff.Mode.SRC_IN);
-                    ForegroundService.stopService();
-                }
-                else {
-                    buttonStop.setBackgroundTintList(red);
-                    nbBluetoothDevicesDisplay.setText("-");
-                    buttonStop.setText("stop");
-                    ContextCompat.startForegroundService(this, new Intent(this, ForegroundService.class));
-                }
+                buttonStop.setVisibility(View.GONE);
+                buttonPause.setVisibility(View.VISIBLE);
+                networkDisplay.setText("-");
+                networkDisplay.setVisibility(View.INVISIBLE);
+                findViewById(R.id.top_bar).setVisibility(View.INVISIBLE);
+                HeatmapManager.ResetHeatmap();
                 break;
 
             case R.id.buttonHistory:
@@ -248,23 +291,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent3);
                 break;
 
-            case R.id.switch_keepData:
-                mEditor.putBoolean("keep_data", switchKeepData.isChecked()).commit();
+            case R.id.buttonDownload:
+                settings_keepData = !settings_keepData;
+                mEditor.putBoolean("keep_data", settings_keepData);
                 mEditor.commit();
-                settings_keepData = switchKeepData.isChecked();
-                if (switchKeepData.isChecked()) XmlManager.Write(XmlManager.defaultFilename);   //save data
+                if (settings_keepData) {
+                    buttonDownload.setBackgroundTintList(green);
+                    buttonDownload.setImageTintList(green);
+
+                    XmlManager.Write(XmlManager.defaultFilename);   //save data
+                }
+                else {
+                    buttonDownload.setBackgroundTintList(red);
+                    buttonDownload.setImageTintList(red);
+                }
         }
     }
 
     public static void updateDashboard(int downSpeed) {
         if (!appPaused) {
-            //nbBluetoothDevicesDisplay.setText(downSpeedToNetwork(downSpeed));
-
             instance.checkPermission();
-            TelephonyManager mTelephonyManager = (TelephonyManager)
-                    instance.getSystemService(Context.TELEPHONY_SERVICE);
+            TelephonyManager mTelephonyManager = (TelephonyManager) instance.getSystemService(Context.TELEPHONY_SERVICE);
             @SuppressLint("MissingPermission") int networkType = mTelephonyManager.getNetworkType();
-            nbBluetoothDevicesDisplay.setText(DataActivity.technologyToNetwork(networkType));//com.xavierclavel.datamapping.networkType);
+            networkDisplay.setText(DataActivity.technologyToNetwork(networkType));//com.xavierclavel.datamapping.networkType);
         }
     }
 
@@ -284,15 +333,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         HeatmapManager.cityAcquired = true;
                         break;
                     }
-
                 }
             }
-
-
             Log.d("address", addresses.get(0).toString());
-            DataActivity.updateLocationData(addresses.get(0).toString());
+            //DataActivity.updateLocationData(addresses.get(0).toString());
         } catch (IOException e) {Log.d("address", "failure");}
-        catch (NullPointerException e) {Log.d("address", "failure");}
     }
 
 
