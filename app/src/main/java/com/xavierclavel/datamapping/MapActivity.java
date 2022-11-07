@@ -29,8 +29,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public static GoogleMap mMap;
     private ActivityMapBinding binding;
     FusedLocationProviderClient fusedLocationClient;
-    boolean locationPermissionGranted;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +55,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
 
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("map", "STOPPED_________________________");
+        HeatmapManager.mapReady = false;
     }
 
     /**
@@ -103,6 +108,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     @SuppressLint("MissingPermission")
     void centerMapOnUser() {
         checkPermission();
+        LocationJobService.checkPermission();
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                     @Override
@@ -137,6 +143,4 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         else Log.d("permission", "Permissions Already Granted");
     }
 
-
-    //build heatmap
 }

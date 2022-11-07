@@ -24,20 +24,30 @@ public class MobileNetworkHandler {
     public TableRow tableRow;
     static final float[] startPoints = {0.2f};
     static List<MobileNetworkHandler> networkHandlers = new ArrayList<>();
+    boolean mainHeatmap;
 
-    public MobileNetworkHandler(int[] color) {
+    public MobileNetworkHandler(int[] color, boolean mainHeatmap) {
         this.color = color;
-        networkHandlers.add(this);
+        this.mainHeatmap = mainHeatmap;
+        if (mainHeatmap) networkHandlers.add(this);
+        Log.d("netword handler", "created");
     }
 
     static void InitializeHeatmap() {
         for (MobileNetworkHandler networkHandler : networkHandlers) {
-            if (networkHandler.initialized) networkHandler.InitializeTileOverlay();
+            networkHandler.InitializeTileOverlay();
         }
     }
 
 
     public void InitializeTileOverlay() {
+        if (data == null || data.size() == 0) return;
+        GoogleMap map = mainHeatmap ? HeatmapManager.map : HistoryHeatmapManager.map;
+        if (map == null) {
+            Log.d("map", "null");
+            return;
+        }
+
         Gradient gradient = new Gradient(color, startPoints);
 
         // Create a heat map tile provider, passing it the latlngs of the police stations.
@@ -48,7 +58,7 @@ public class MobileNetworkHandler {
                 .build();
 
         // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay = HeatmapManager.map.addTileOverlay(new TileOverlayOptions().tileProvider(tileProvider));
+        tileOverlay = map.addTileOverlay(new TileOverlayOptions().tileProvider(tileProvider));
 
         //tableRow.setVisibility(View.VISIBLE);   //display legend
 
@@ -56,9 +66,11 @@ public class MobileNetworkHandler {
     }
 
     void updateHeatmap() {
-        Log.d("heatmap", "4G updated");
+        Log.d("heatmap", "updated");
         if (data == null) data = new ArrayList<>();
         data.add(HeatmapManager.locationData);
+
+        Log.d("size", ""+data.size());
 
         if (initialized) {
             tileProvider.setData(data);
@@ -67,4 +79,6 @@ public class MobileNetworkHandler {
             InitializeTileOverlay();
         }
     }
+
+
 }

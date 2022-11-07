@@ -114,10 +114,10 @@ public class LocationJobService extends JobService {
         }
     }
 
-    void checkPermission() {
-        int permission1 = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
-        int permission2 = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        int permission3 = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+    public static void checkPermission() {
+        int permission1 = ContextCompat.checkSelfPermission(MainActivity.instance, Manifest.permission.ACCESS_COARSE_LOCATION);
+        int permission2 = ContextCompat.checkSelfPermission(MainActivity.instance, Manifest.permission.ACCESS_FINE_LOCATION);
+        int permission3 = ContextCompat.checkSelfPermission(MainActivity.instance, Manifest.permission.ACCESS_BACKGROUND_LOCATION);
 
         // Check for permissions
         if (permission1 != PackageManager.PERMISSION_GRANTED) {

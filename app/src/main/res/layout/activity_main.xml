@@ -79,14 +79,6 @@
         android:layout_marginTop="10dp"
         android:orientation="vertical">
 
-        <Switch
-            android:id="@+id/switch_keepData"
-            android:layout_width="match_parent"
-            android:layout_height="32dp"
-            android:paddingHorizontal="30dp"
-            android:visibility="gone"
-            android:text="Keep data" />
-
         <LinearLayout
             android:id="@+id/top_bar"
             android:layout_width="match_parent"
@@ -104,12 +96,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/button_empty"
-                android:backgroundTint="#B85252"
+                android:background="@drawable/border_on_click"
+                android:backgroundTint="#C8C8C8"
                 android:minHeight="50dp"
                 android:visibility="visible"
                 app:srcCompat="@drawable/pause"
-                app:tint="#B85252" />
+                app:tint="#C8C8C8" />
 
             <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/buttonStop"
@@ -117,11 +109,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/button_empty"
-                android:backgroundTint="#B85252"
+                android:background="@drawable/border_on_click"
+                android:backgroundTint="#C8C8C8"
                 android:minHeight="50dp"
                 android:visibility="gone"
                 app:srcCompat="@drawable/stop"
+                app:tint="#C8C8C8" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/buttonDownload"
+                android:layout_marginHorizontal="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/border_on_click"
+                android:backgroundTint="#B85252"
+                android:minHeight="50dp"
+                android:visibility="visible"
+                app:srcCompat="@drawable/download"
                 app:tint="#B85252" />
 
 
@@ -131,25 +136,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/button_empty"
+                android:background="@drawable/border_on_click"
                 android:backgroundTint="#C8C8C8"
                 android:minHeight="50dp"
                 android:visibility="visible"
                 app:srcCompat="@drawable/disk"
                 app:tint="#C8C8C8" />
-
-            <androidx.appcompat.widget.AppCompatImageButton
-                android:id="@+id/buttonDownload"
-                android:layout_marginHorizontal="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/button_empty"
-                android:backgroundTint="#B85252"
-                android:minHeight="50dp"
-                android:visibility="visible"
-                app:srcCompat="@drawable/download"
-                app:tint="#B85252" />
 
         </LinearLayout>
 
@@ -186,7 +178,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_weight="1"
-                android:background="@drawable/button_empty"
+                android:background="@drawable/border_on_click"
                 android:foregroundTint="#FF9800"
                 android:minHeight="50dp"
                 android:visibility="visible"
@@ -199,7 +191,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_weight="1"
-                android:background="@drawable/button_empty"
+                android:background="@drawable/border_on_click"
                 android:foregroundTint="#FF9800"
                 android:minHeight="50dp"
                 android:visibility="visible"
@@ -212,7 +204,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_weight="1"
-                android:background="@drawable/button_empty"
+                android:background="@drawable/border_on_click"
                 android:minHeight="50dp"
                 android:visibility="visible"
                 app:srcCompat="@drawable/map"

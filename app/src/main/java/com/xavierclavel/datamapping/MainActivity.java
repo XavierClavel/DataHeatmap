@@ -15,13 +15,18 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.os.Vibrator;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -35,8 +40,9 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     //TODO : prevent data points from being too close d > 5m to avoid having too much useless data
-    //TODO : use threads to read data from xml file to prevent blocking the app in case of large measurements
+    //TODO : use threads to read data (and write) from xml file to prevent blocking the app in case of large measurements : is it necessary ?
     //TODO : set map in dark mode ?
+    //TODO : delete notification when measurement is cancelled
 
     public static MainActivity instance;
     public static TextView networkDisplay;
@@ -76,22 +82,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             new int[] {Color.rgb(184,82,82)}
         );
 
-    static ColorStateList writeStateList = new ColorStateList(
-            new int[][]{
-                    new int[]{android.R.attr.state_enabled},
-                    new int[] {android.R.attr.state_pressed}
-            },
-
-            new int[] {
-                    Color.rgb(200,200,200),
-                    Color.rgb(139,195,74)
-            }
-    );
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("foreground service already runnning", ForegroundService.shouldReschedule + "");
+        //if the value of the bool is preserved through the foreground service when app is closed, it is possible to use it to know
+        //whether the memory should be read or not.
+        //reading memory if the data has been preserved causes it to be duplicated, which is unwanted.
+        // -> read data ?
+        // -> display play button or network indicator ?
+
+        boolean appAlreadyRunning = ForegroundService.shouldReschedule;
+
         setContentView(R.layout.activity_main);
 
         progressBar = findViewById(R.id.progressBar);
@@ -118,9 +121,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.buttonHistory).setOnClickListener(this);
         findViewById(R.id.buttonMap).setOnClickListener(this);
 
-        buttonWrite.setBackgroundTintList(writeStateList);
-        buttonWrite.setImageTintList(writeStateList);
-
         instance = this;
         //Start foreground service that will schedule the various Jobs.
         Log.d("main activity", "initiated");
@@ -135,19 +135,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
 
-        /*
-        4G -> 13 -> LTE
-        H+ -> 15 -> HSPA+
-        H -> 10 -> HSPA
-        3G -> 3 -> UMTS
-        EDGE -> 2
-        GPRS -> 1
-        GSM -> 16
-        NONE -> 0
-
-         */
-
-        getLocalData();
+        if (appAlreadyRunning) setupControlDisplay();
+        else getLocalData();
 
     }
 
@@ -170,22 +159,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         settings_idMeasurement = mPrefs.getInt("nb_measurements",0);
         Log.d("id", settings_idMeasurement+"");
-        if (settings_idMeasurement == 0) mEditor.putInt("nb_measurements", 0);
-        mEditor.commit();
+        if (settings_idMeasurement == 0) mEditor.putInt("nb_measurements", 0).commit();
 
-        //settings_keepData = false;
         settings_keepData = mPrefs.getBoolean("keep_data", false);
         Log.d("keep data", settings_keepData + "");
         if (settings_keepData) {    //continue existing measurement
             buttonDownload.setBackgroundTintList(green);    //change color to reflect the parameter
             buttonDownload.setImageTintList(green);
+            //buttonDownload.setBackgroundResource(R.drawable.border_always);
             List<TimestampedData> timestampedDataList = XmlManager.Read(XmlManager.defaultFilename);      //access the data from the last measurement
             for (TimestampedData timestampedData: timestampedDataList) {
                 Log.d("previous data", timestampedData.position + " " + timestampedData.network);
                 HeatmapManager.addDataPoint(timestampedData.position, timestampedData.network); //plot data
             }
+            HeatmapManager.allDataPointAdded();
         }
         else settings_idMeasurement++;    //new measurement
+
+        setupStartDisplay();
     }
     void checkPermission() {
         int permission1 = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
@@ -203,14 +194,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else Log.d("permission", "Permissions Already Granted");
     }
 
+    void setupStartDisplay() {
+        networkDisplay.setVisibility(View.INVISIBLE);
+        findViewById(R.id.top_bar).setVisibility(View.INVISIBLE);
+
+        buttonStart.setVisibility(View.VISIBLE);
+    }
+
+    void setupControlDisplay() {
+        buttonStart.setVisibility(View.INVISIBLE);
+
+        networkDisplay.setVisibility(View.VISIBLE);
+        findViewById(R.id.top_bar).setVisibility(View.VISIBLE);
+
+        buttonStop.setVisibility(View.GONE);
+        buttonPause.setVisibility(View.VISIBLE);
+    }
+
+    @SuppressLint("MissingPermission")
     public void onClick(View view) {
         switch(view.getId()) {
             case R.id.buttonPlay:
-                findViewById(R.id.top_bar).setVisibility(View.VISIBLE);
-                buttonStart.setVisibility(View.INVISIBLE);
-                buttonStop.setVisibility(View.GONE);
-                buttonPause.setVisibility(View.VISIBLE);
-                networkDisplay.setVisibility(View.VISIBLE);
+                setupControlDisplay();
 
                 appPaused = false;
                 idleProgressBar.setVisibility(View.INVISIBLE);
@@ -223,6 +228,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.buttonMap:
+                //LocationJobService.checkPermission();
                 Intent intent = new Intent(this, MapActivity.class);
                 startActivity(intent);
                 break;
@@ -242,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String currentTime = Calendar.getInstance().getTime().toString();
                 String filename = "measurement" + settings_idMeasurement;
                 MeasurementSummary currentMeasurementSummary = new MeasurementSummary(currentTime, cityName, HeatmapManager.nbPoints+"", filename);
-                if (isMeasurementSaved) {
+                if (isMeasurementSaved) {   //TODO : prevent overwrite when cancelling measurement
                     measurementSummaries.set(measurementSummaries.size()-1,currentMeasurementSummary);
                 }
                 else {
@@ -254,18 +260,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 XmlManager.WriteHistory(measurementSummaries);  //write info detail about this measurement, including filename
                 XmlManager.Write(filename); //write the measurement in an xml file
                 isMeasurementSaved = true;
+
+                //Display message to confirm that the measurement was successfully saved
+                Toast.makeText(this, "Measurement saved", Toast.LENGTH_LONG).show();
+
+
+                // Vibrate for 100 milliseconds
+                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
                 break;
 
             case R.id.buttonPause:
                 buttonPause.setVisibility(View.GONE);
                 buttonStop.setVisibility(View.VISIBLE);
+
                 appPaused = true;
                 progressBar.setVisibility(View.INVISIBLE);  //change visible progress bar to show idle state
                 idleProgressBar.setVisibility(View.VISIBLE);
                 networkDisplay.setVisibility(View.INVISIBLE);
 
                 buttonStart.setVisibility(View.VISIBLE);
-                //TODO : set image to stop icon
 
                 progressBar.setProgress(0);
                 animation.cancel();
@@ -283,7 +297,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 networkDisplay.setText("-");
                 networkDisplay.setVisibility(View.INVISIBLE);
                 findViewById(R.id.top_bar).setVisibility(View.INVISIBLE);
+                if (isMeasurementSaved) settings_idMeasurement++;
+                isMeasurementSaved = false;
                 HeatmapManager.ResetHeatmap();
+                ForegroundService.cancelNotification();
                 break;
 
             case R.id.buttonHistory:
@@ -298,12 +315,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (settings_keepData) {
                     buttonDownload.setBackgroundTintList(green);
                     buttonDownload.setImageTintList(green);
+                    //buttonDownload.setBackgroundResource(R.drawable.border_always);
 
                     XmlManager.Write(XmlManager.defaultFilename);   //save data
                 }
                 else {
                     buttonDownload.setBackgroundTintList(red);
                     buttonDownload.setImageTintList(red);
+                    //buttonDownload.setBackgroundResource(R.drawable.border_on_click);
                 }
         }
     }

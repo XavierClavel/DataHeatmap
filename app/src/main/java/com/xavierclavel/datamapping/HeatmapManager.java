@@ -31,8 +31,6 @@ public class HeatmapManager {
     static Integer mobileNetworkDataUplink;
     static Integer mobileNetworkDataType;
 
-    static final float[] startPoints = {0.2f};
-
     static final int[] color_5G = {Color.rgb(32,218,190)};      //cyan
     static final int[] color_4G = {Color.rgb(102, 225, 0)};     //green
     static final int[] color_Hplus = {Color.rgb(255, 255, 0)};  //yellow
@@ -50,24 +48,15 @@ public class HeatmapManager {
 
     static LatLng lastPos = null;
 
-    public static MobileNetworkHandler networkHandler_5G = new MobileNetworkHandler(color_5G);
-    public static MobileNetworkHandler networkHandler_4G = new MobileNetworkHandler(color_4G);
-    public static MobileNetworkHandler  networkHandler_3G = new MobileNetworkHandler(color_Hplus);
-    public static MobileNetworkHandler networkHandler_Hplus = new MobileNetworkHandler(color_Hplus);
-    public static MobileNetworkHandler networkHandler_H = new MobileNetworkHandler(color_H);
-    public static MobileNetworkHandler networkHandler_E = new MobileNetworkHandler(color_E);
-    public static MobileNetworkHandler networkHandler_G = new MobileNetworkHandler(color_G);
-    public static MobileNetworkHandler networkHandler_None = new MobileNetworkHandler(color_None);
+    public static MobileNetworkHandler networkHandler_5G = new MobileNetworkHandler(color_5G, true);
+    public static MobileNetworkHandler networkHandler_4G = new MobileNetworkHandler(color_4G, true);
+    public static MobileNetworkHandler  networkHandler_3G = new MobileNetworkHandler(color_3G, true);
+    public static MobileNetworkHandler networkHandler_Hplus = new MobileNetworkHandler(color_Hplus, true);
+    public static MobileNetworkHandler networkHandler_H = new MobileNetworkHandler(color_H, true);
+    public static MobileNetworkHandler networkHandler_E = new MobileNetworkHandler(color_E, true);
+    public static MobileNetworkHandler networkHandler_G = new MobileNetworkHandler(color_G, true);
+    public static MobileNetworkHandler networkHandler_None = new MobileNetworkHandler(color_None, true);
 
-
-    static boolean areDistantEnough(LatLng locA, LatLng locB) {
-        if (locA == null || locB == null) return true;
-        float[] results = new float[3];
-        Location.distanceBetween(locA.latitude, locA.longitude, locB.latitude, locB.longitude, results);
-        float distance = results[0];
-        Log.d("distance bewteen points", ""+ distance);
-        return distance < minDistance;
-    }
 
     public static void initializeHeatMap() {    //gets executed when the map is displayed
         map = MapActivity.mMap;
@@ -77,6 +66,8 @@ public class HeatmapManager {
         Log.d("heatmap", "map initialized");
 
         mapReady = true;
+
+
     }
 
     public static void locationDataSocket(LatLng latLng) {
@@ -95,7 +86,6 @@ public class HeatmapManager {
         mobileNetworkDataUplink = upSpeed;
         MainActivity.updateDashboard(mobileNetworkDataDownlink);    //A modifier
 
-        //if (areDistantEnough(locationData, ))
         if (locationData != null) updateHeatmap();
     }
 
@@ -105,20 +95,29 @@ public class HeatmapManager {
         mobileNetworkDataType = networkType;
 
         nbPoints ++;
-        MainActivity.nbMeasurementsDisplay.setText(nbPoints + " measurements");
         if (DataActivity.nbPointsDisplay != null) DataActivity.nbPointsDisplay.setText(""+nbPoints);
-        //ForegroundService.updateNotification();
 
         Log.d("heatmap manager", "new data point acquired");
-        //Toast.makeText(ForegroundService.instance, "Data point acquired", Toast.LENGTH_LONG).show();
 
-        //technologyToHeatmap(mobileNetworkDataType);
+        technologyToHeatmap(mobileNetworkDataType);
+        //networkHandler_None.updateHeatmap();
 
         locationData = null;
         mobileNetworkDataDownlink = null;
     }
 
+    public static void allDataPointAdded() {
+        MainActivity.nbMeasurementsDisplay.setText(nbPoints + " measurements");
+    }
+
     static void updateHeatmap() {
+
+        if (areFarEnough(locationData, lastPos)) {
+            lastPos = locationData;
+            return;
+        }
+
+        lastPos = locationData;
 
         nbPoints ++;
         MainActivity.nbMeasurementsDisplay.setText(nbPoints + " measurements");
@@ -150,17 +149,22 @@ public class HeatmapManager {
 
     public static void ResetHeatmap() {
         MobileNetworkHandler.networkHandlers = new ArrayList<>();
-        networkHandler_5G = new MobileNetworkHandler(color_5G);
-        networkHandler_4G = new MobileNetworkHandler(color_4G);
-        networkHandler_3G = new MobileNetworkHandler(color_Hplus);
-        networkHandler_Hplus = new MobileNetworkHandler(color_Hplus);
-        networkHandler_H = new MobileNetworkHandler(color_H);
-        networkHandler_E = new MobileNetworkHandler(color_E);
-        networkHandler_G = new MobileNetworkHandler(color_G);
-        networkHandler_None = new MobileNetworkHandler(color_None);
+        networkHandler_5G = new MobileNetworkHandler(color_5G, true);
+        networkHandler_4G = new MobileNetworkHandler(color_4G, true);
+        networkHandler_3G = new MobileNetworkHandler(color_3G, true);
+        networkHandler_Hplus = new MobileNetworkHandler(color_Hplus, true);
+        networkHandler_H = new MobileNetworkHandler(color_H, true);
+        networkHandler_E = new MobileNetworkHandler(color_E, true);
+        networkHandler_G = new MobileNetworkHandler(color_G, true);
+        networkHandler_None = new MobileNetworkHandler(color_None, true);
+
+        nbPoints = 0;
+        MainActivity.nbMeasurementsDisplay.setText(" ");
     }
 
     static boolean areFarEnough(LatLng latLngA, LatLng latLngB) {
+        if (latLngA == null || latLngB == null) return true;
+
         Location locationA = new Location("point A");
         locationA.setLatitude(latLngA.latitude);
         locationA.setLongitude(latLngA.longitude);
@@ -169,8 +173,10 @@ public class HeatmapManager {
         locationB.setLongitude(latLngB.longitude);
 
         float distance = locationA.distanceTo(locationB);
+        Log.d("distance", ""+distance);
+        Log.d("are far enough", "" + (distance > minDistance));
 
-        return distance < minDistance;
+        return distance > minDistance;
     }
 
 }

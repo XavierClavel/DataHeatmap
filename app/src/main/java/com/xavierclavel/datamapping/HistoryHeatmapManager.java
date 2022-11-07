@@ -22,39 +22,14 @@ public class HistoryHeatmapManager {
     static LatLng locationData;
     static Integer mobileNetworkDataType;
 
-    static List<LatLng> data_3G;
-    static List<LatLng> data_4G;
-    static List<LatLng> data_Hplus;
-    static List<LatLng> data_H;
-    static List<LatLng> data_E;
-    static List<LatLng> data_G;
-    static List<LatLng> data_None;
-
-    static HeatmapTileProvider provider_4G;
-    static HeatmapTileProvider provider_3G;
-    static HeatmapTileProvider provider_Hplus;
-    static HeatmapTileProvider provider_H;
-    static HeatmapTileProvider provider_E;
-    static HeatmapTileProvider provider_G;
-    static HeatmapTileProvider provider_None;
-
-    static TileOverlay tileOverlay_4G;
-    static TileOverlay tileOverlay_3G;
-    static TileOverlay tileOverlay_Hplus;
-    static TileOverlay tileOverlay_H;
-    static TileOverlay tileOverlay_E;
-    static TileOverlay tileOverlay_G;
-    static TileOverlay tileOverlay_None;
-
-    static final float[] startPoints = {0.2f};
-
-    static final int[] color_4G = {Color.rgb(102, 225, 0)};     //green
-    static final int[] color_Hplus = {Color.rgb(255, 255, 0)};  //yellow
-    static final int[] color_H = {Color.rgb(255, 102, 0)};      //orange
-    static final int[] color_3G = {Color.rgb(255, 10, 0)};      //red
-    static final int[] color_E = {Color.rgb(156,39,179)};       //violet
-    static final int[] color_G = {Color.rgb(99, 99, 99)};       //light grey
-    static  final int[] color_None = {Color.rgb(0, 0, 0)};      //black
+    public static MobileNetworkHandler networkHandler_5G = new MobileNetworkHandler(HeatmapManager.color_5G, false);
+    public static MobileNetworkHandler networkHandler_4G = new MobileNetworkHandler(HeatmapManager.color_4G, false);
+    public static MobileNetworkHandler networkHandler_3G = new MobileNetworkHandler(HeatmapManager.color_3G, false);
+    public static MobileNetworkHandler networkHandler_Hplus = new MobileNetworkHandler(HeatmapManager.color_Hplus, false);
+    public static MobileNetworkHandler networkHandler_H = new MobileNetworkHandler(HeatmapManager.color_H, false);
+    public static MobileNetworkHandler networkHandler_E = new MobileNetworkHandler(HeatmapManager.color_E, false);
+    public static MobileNetworkHandler networkHandler_G = new MobileNetworkHandler(HeatmapManager.color_G, false);
+    public static MobileNetworkHandler networkHandler_None = new MobileNetworkHandler(HeatmapManager.color_None, false);
 
     public static TableRow tableRow_4G;
     public static TableRow tableRow_3G;
@@ -71,30 +46,33 @@ public class HistoryHeatmapManager {
     public static void initializeHeatMap() {    //gets executed when the map is displayed
         map = HistoryMapActivity.mMap;
 
-        data_4G = new ArrayList<>();    //reset all the data
-        data_3G = new ArrayList<>();
-        data_Hplus = new ArrayList<>();
-        data_H = new ArrayList<>();
-        data_E = new ArrayList<>();
-        data_G = new ArrayList<>();
-        data_None = new ArrayList<>();
-
         addData();
     }
 
     static void addData() {
+        networkHandler_5G.data = new ArrayList<>();
+        networkHandler_4G.data = new ArrayList<>();
+        networkHandler_3G.data = new ArrayList<>();
+        networkHandler_Hplus.data = new ArrayList<>();
+        networkHandler_H.data = new ArrayList<>();
+        networkHandler_E.data = new ArrayList<>();
+        networkHandler_G.data = new ArrayList<>();
+        networkHandler_None.data = new ArrayList<>();
 
-        for (TimestampedData dataPoint: data) {
+        for (TimestampedData dataPoint : data) {
             addDataPoint(dataPoint.position, dataPoint.network);
         }
 
-        if (data_4G.size() != 0) InitializeTileOverlay4G();  //display the 4G heatmap
-        if (data_3G.size() != 0) InitializeTileOverlay3G();  //display the 3G heatmap
-        if (data_Hplus.size() != 0) InitializeTileOverlayHplus();
-        if (data_H.size() != 0) InitializeTileOverlayH();
-        if (data_E.size() != 0) InitializeTileOverlayE();
-        if (data_G.size() != 0) InitializeTileOverlayG();
-        if (data_None.size() != 0) InitializeTileOverlayNone();
+        if (networkHandler_5G.data.size() != 0) networkHandler_5G.InitializeTileOverlay();
+        if (networkHandler_4G.data.size() != 0)
+            networkHandler_4G.InitializeTileOverlay();  //display the 4G heatmap
+        if (networkHandler_3G.data.size() != 0) networkHandler_3G.InitializeTileOverlay();
+        if (networkHandler_Hplus.data.size() != 0) networkHandler_Hplus.InitializeTileOverlay();
+        if (networkHandler_H.data.size() != 0) networkHandler_H.InitializeTileOverlay();
+        if (networkHandler_E.data.size() != 0) networkHandler_E.InitializeTileOverlay();
+        if (networkHandler_G.data.size() != 0) networkHandler_G.InitializeTileOverlay();
+        if (networkHandler_None.data.size() != 0) networkHandler_None.InitializeTileOverlay();
+
     }
 
     public static void addDataPoint(LatLng location, int networkType) {
@@ -114,126 +92,16 @@ public class HistoryHeatmapManager {
     }
 
     public static void technologyToHeatmap(int networkType) {
-        if (networkType == 0) data_None.add(locationData);
-        else if (networkType == 1) data_G.add(locationData);
-        else if (networkType == 2) data_E.add(locationData);
-        else if (networkType <= 7 || networkType == 11 || networkType == 17) data_3G.add(locationData);
-        else if (networkType <= 10) data_H.add(locationData);
-        else if (networkType == 13 || networkType == 20) data_4G.add(locationData);
-        else if (networkType == 15) data_Hplus.add(locationData);
+        if (networkType == 0) networkHandler_None.data.add(locationData);
+        else if (networkType == 1) networkHandler_G.data.add(locationData);
+        else if (networkType == 2) networkHandler_E.data.add(locationData);
+        else if (networkType <= 7 || networkType == 11 || networkType == 17) networkHandler_3G.data.add(locationData);
+        else if (networkType <= 10) networkHandler_H.data.add(locationData);
+        else if (networkType == 13) networkHandler_4G.data.add(locationData);
+        else if (networkType == 15) networkHandler_Hplus.data.add(locationData);
+        else if (networkType == 20) networkHandler_5G.data.add(locationData);
         //else if (networkType == 16) return "2G";
         //TODO : 5G
     }
-
-    public static void InitializeTileOverlay4G() {
-        Gradient gradient_4G = new Gradient(color_4G, startPoints);
-
-        // Create a heat map tile provider, passing it the latlngs of the police stations.
-        provider_4G = new HeatmapTileProvider.Builder()
-                .data(data_4G)
-                .radius(50)
-                .gradient(gradient_4G)
-                .build();
-
-        // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_4G = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_4G));
-
-        tableRow_4G.setVisibility(View.VISIBLE);   //display legend
-    }
-
-    public static void InitializeTileOverlay3G() {
-        Gradient gradient_3G = new Gradient(color_3G, startPoints);
-
-        // Create a heat map tile provider, passing it the latlngs of the police stations.
-        provider_3G = new HeatmapTileProvider.Builder()
-                .data(data_3G)
-                .radius(50)
-                .gradient(gradient_3G)
-                .build();
-
-        // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_3G = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_3G));
-
-        tableRow_3G.setVisibility(View.VISIBLE);
-    }
-
-    public static void InitializeTileOverlayHplus() {
-        Gradient gradient_Hplus = new Gradient(color_Hplus, startPoints);
-
-        // Create a heat map tile provider, passing it the latlngs of the police stations.
-        provider_Hplus = new HeatmapTileProvider.Builder()
-                .data(data_Hplus)
-                .radius(50)
-                .gradient(gradient_Hplus)
-                .build();
-
-        // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_Hplus = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_Hplus));
-
-        tableRow_Hplus.setVisibility(View.VISIBLE);
-    }
-
-    public static void InitializeTileOverlayH() {
-        Gradient gradient_H = new Gradient(color_H, startPoints);
-
-        // Create a heat map tile provider, passing it the latlngs of the police stations.
-        provider_H = new HeatmapTileProvider.Builder()
-                .data(data_H)
-                .radius(50)
-                .gradient(gradient_H)
-                .build();
-
-        // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_H = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_H));
-
-        tableRow_H.setVisibility(View.VISIBLE);
-    }
-
-    public static void InitializeTileOverlayE() {
-        Gradient gradient_E = new Gradient(color_E, startPoints);
-
-        // Create a heat map tile provider, passing it the latlngs of the police stations.
-        provider_E = new HeatmapTileProvider.Builder()
-                .data(data_E)
-                .radius(50)
-                .gradient(gradient_E)
-                .build();
-
-        // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_E = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_E));
-
-        tableRow_E.setVisibility(View.VISIBLE);
-    }
-
-    public static void InitializeTileOverlayG() {
-        Gradient gradient_G = new Gradient(color_G, startPoints);
-
-        // Create a heat map tile provider, passing it the latlngs of the police stations.
-        provider_G = new HeatmapTileProvider.Builder()
-                .data(data_G)
-                .radius(50)
-                .gradient(gradient_G)
-                .build();
-
-        // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_G = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_G));
-
-        tableRow_G.setVisibility(View.VISIBLE);
-    }
-
-    public static void InitializeTileOverlayNone() {
-        Gradient gradient_None = new Gradient(color_None, startPoints);
-
-        // Create a heat map tile provider, passing it the latlngs of the police stations.
-        provider_None = new HeatmapTileProvider.Builder()
-                .data(data_None)
-                .radius(50)
-                .gradient(gradient_None)
-                .build();
-
-        // Add a tile overlay to the map, using the heat map tile provider.
-        tileOverlay_None = map.addTileOverlay(new TileOverlayOptions().tileProvider(provider_None));
-
-        tableRow_None.setVisibility(View.VISIBLE);
-    }
 }
+

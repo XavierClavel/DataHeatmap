@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,9 +31,6 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
     List<MeasurementSummary> measurementSummaries;
     List<ImageButton> buttonList;
     ImageButton buttonDelete;
-
-    HashMap<Integer,RelativeLayout> dictionaryButtonToLayout = new HashMap<>();
-    HashMap<Integer,MeasurementSummary> dictionaryButtonToObject = new HashMap<>();
 
     boolean isDeleting = false;
 
@@ -134,7 +130,7 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
 
         ImageButton displayButton = new ImageButton(HistoryActivity.this);
         Log.d("button id", displayButton.getId() + "");
-        displayButton.setBackgroundResource(R.drawable.button_empty);
+        displayButton.setBackgroundResource(R.drawable.border_on_click);
         displayButton.setBackgroundTintList(orange);
         displayButton.setImageResource(R.drawable.map);
         displayButton.setImageTintList(orange);
@@ -145,12 +141,23 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
         layout1.addView(buttonLayout);
         buttonLayout.addView(displayButton);
 
+        linLayout.addView(layout);
+
+        ImageView separator = new ImageView(this);
+        separator.setImageResource(R.drawable.line);
+        separator.setPadding(150,0,150,0);
+        separator.setImageTintList(orange);
+        linLayout.addView(separator);
+
+        bottomImageView = separator;
+
         buttonList.add(displayButton);
         displayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (isDeleting) {
                     linLayout.removeView(layout);
+                    linLayout.removeView(separator);
                     Log.d("measurement removed", measurementSummary.date);
                     measurementSummaries.remove(measurementSummary);
                     File dir = MainActivity.instance.getFilesDir();
@@ -174,16 +181,6 @@ public class HistoryActivity extends AppCompatActivity implements View.OnClickLi
             }
         });
 
-
-        linLayout.addView(layout);
-
-        ImageView image = new ImageView(this);  //separator
-        image.setImageResource(R.drawable.line);
-        image.setPadding(150,0,150,0);
-        image.setImageTintList(orange);
-        linLayout.addView(image);
-
-        bottomImageView = image;
 }
 
 

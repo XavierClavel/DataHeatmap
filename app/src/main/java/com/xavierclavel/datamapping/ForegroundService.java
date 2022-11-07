@@ -27,11 +27,10 @@ public class ForegroundService extends Service {
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
     static boolean isjobLocationOver = false;
     static boolean isMobileNetworkJobOver = false;
-    static boolean shouldReschedule = true;
+    public static boolean shouldReschedule = false;
     static PendingIntent pendingIntent;
 
     public static String notificationTitle = "Scanning in progress...";
-    public static int notificationData;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -43,8 +42,8 @@ public class ForegroundService extends Service {
         pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.app_icon)
-                .setContentTitle("Foreground Service")
-                .setContentText("hello world")
+                .setContentTitle("Network Scanner")
+                .setContentText("Scan will begin shortly")
                 .setContentIntent(pendingIntent)
                 .build();
         startForeground(1, notification);
@@ -73,7 +72,6 @@ public class ForegroundService extends Service {
                 .build();
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(instance);
-
         notificationManager.notify(1, notification);
     }
 
@@ -146,6 +144,11 @@ public class ForegroundService extends Service {
         shouldReschedule = false;
 
         instance.stopSelf();
+    }
+
+    public static void cancelNotification() {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(instance);
+        notificationManager.cancel(1);
     }
 
     @Override
