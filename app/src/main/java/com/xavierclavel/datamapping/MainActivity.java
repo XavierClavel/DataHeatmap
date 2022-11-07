@@ -15,8 +15,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.telephony.TelephonyManager;
@@ -42,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //TODO : prevent data points from being too close d > 5m to avoid having too much useless data
     //TODO : use threads to read data (and write) from xml file to prevent blocking the app in case of large measurements : is it necessary ?
     //TODO : set map in dark mode ?
-    //TODO : delete notification when measurement is cancelled
+    //TODO : save bundle state in data activity
 
     public static MainActivity instance;
     public static TextView networkDisplay;
@@ -87,11 +85,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d("foreground service already runnning", ForegroundService.shouldReschedule + "");
-        //if the value of the bool is preserved through the foreground service when app is closed, it is possible to use it to know
-        //whether the memory should be read or not.
-        //reading memory if the data has been preserved causes it to be duplicated, which is unwanted.
-        // -> read data ?
-        // -> display play button or network indicator ?
 
         boolean appAlreadyRunning = ForegroundService.shouldReschedule;
 
@@ -298,9 +291,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 networkDisplay.setVisibility(View.INVISIBLE);
                 findViewById(R.id.top_bar).setVisibility(View.INVISIBLE);
                 if (isMeasurementSaved) settings_idMeasurement++;
+                mEditor.putInt("nb_measurements", settings_idMeasurement);
+                mEditor.commit();
                 isMeasurementSaved = false;
                 HeatmapManager.ResetHeatmap();
                 ForegroundService.cancelNotification();
+                XmlManager.EraseMemory();
                 break;
 
             case R.id.buttonHistory:
@@ -355,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
             Log.d("address", addresses.get(0).toString());
-            //DataActivity.updateLocationData(addresses.get(0).toString());
+            DataActivity.updateLocationData(addresses.get(0).toString());
         } catch (IOException e) {Log.d("address", "failure");}
     }
 

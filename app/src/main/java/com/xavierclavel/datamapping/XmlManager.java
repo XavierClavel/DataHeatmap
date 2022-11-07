@@ -40,7 +40,13 @@ public class XmlManager {
     public static List<TimestampedData> dataMemory;
     static String xmlDebugFile;
 
+    public static void EraseMemory() {
+        dataMemory = new ArrayList<>();
+        Write(defaultFilename);
+    }
+
     public static void Memorize(LatLng position, int network) {
+        if (!ForegroundService.shouldReschedule) return; //do not memorize if
         dataMemory = dataMemory == null ? new ArrayList<>() : dataMemory;
         dataMemory.add(new TimestampedData(getTimestamp(), position, network));
         Log.d("xml manager", "data written | total amount of data : " + dataMemory.size());
@@ -48,7 +54,7 @@ public class XmlManager {
         Date currentTime = Calendar.getInstance().getTime();
         Log.d("time", currentTime.toString());
 
-        if (MainActivity.settings_keepData) Write(XmlManager.defaultFilename);
+        if (MainActivity.settings_keepData) Write(defaultFilename);
     }
 
     public static void Write(String filename) {

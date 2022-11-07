@@ -75,6 +75,16 @@ public class ForegroundService extends Service {
         notificationManager.notify(1, notification);
     }
 
+    public static void JobsControl() {
+        if (shouldReschedule) {
+            scheduleJobs();
+        }
+        else {
+            HeatmapManager.locationData = null;
+            HeatmapManager.mobileNetworkDataType = null;
+        }
+    }
+
     public static void scheduleJobs(){
         MainActivity.Animate();
         scheduleJobWiFi();
@@ -108,9 +118,7 @@ public class ForegroundService extends Service {
     public static void JobMobileNetworkOver() {
         if (isjobLocationOver) {
             isjobLocationOver = false;
-            if (shouldReschedule) {
-                scheduleJobs();
-            }
+            JobsControl();
         }
         else {
             isMobileNetworkJobOver = true;
@@ -120,9 +128,7 @@ public class ForegroundService extends Service {
     public static void JobLocationOver() {
         if (isMobileNetworkJobOver) {
             isMobileNetworkJobOver = false;
-            if (shouldReschedule) {
-                scheduleJobs();
-            }
+            JobsControl();
         }
         else {
             isjobLocationOver = true;

@@ -3,17 +3,11 @@ package com.xavierclavel.datamapping;
 import android.graphics.Color;
 import android.location.Location;
 import android.util.Log;
-import android.view.View;
-import android.widget.TableRow;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.TileOverlay;
-import com.google.maps.android.heatmaps.HeatmapTileProvider;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class HeatmapManager {
 
@@ -26,10 +20,10 @@ public class HeatmapManager {
 
     public static boolean mapReady = false;
 
-    static LatLng locationData;
+    public static LatLng locationData;
+    public static Integer mobileNetworkDataType;
     static Integer mobileNetworkDataDownlink;
     static Integer mobileNetworkDataUplink;
-    static Integer mobileNetworkDataType;
 
     static final int[] color_5G = {Color.rgb(32,218,190)};      //cyan
     static final int[] color_4G = {Color.rgb(102, 225, 0)};     //green
@@ -76,7 +70,7 @@ public class HeatmapManager {
         }
         DataActivity.updateLocationDisplay(latLng);
         locationData = latLng;
-        if (mobileNetworkDataDownlink != null) updateHeatmap();
+        if (mobileNetworkDataType != null) updateHeatmap();
     }
 
     public static void mobileNetworkDataSocket(int networkType, int downSpeed, int upSpeed) {
@@ -95,7 +89,6 @@ public class HeatmapManager {
         mobileNetworkDataType = networkType;
 
         nbPoints ++;
-        if (DataActivity.nbPointsDisplay != null) DataActivity.nbPointsDisplay.setText(""+nbPoints);
 
         Log.d("heatmap manager", "new data point acquired");
 
@@ -111,6 +104,7 @@ public class HeatmapManager {
     }
 
     static void updateHeatmap() {
+        if (!ForegroundService.shouldReschedule) return;
 
         if (areFarEnough(locationData, lastPos)) {
             lastPos = locationData;
@@ -121,7 +115,6 @@ public class HeatmapManager {
 
         nbPoints ++;
         MainActivity.nbMeasurementsDisplay.setText(nbPoints + " measurements");
-        if (DataActivity.nbPointsDisplay != null) DataActivity.nbPointsDisplay.setText(""+nbPoints);
         ForegroundService.updateNotification();
 
         Log.d("heatmap manager", "new data point acquired");

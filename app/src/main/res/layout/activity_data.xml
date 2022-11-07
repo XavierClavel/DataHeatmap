@@ -97,13 +97,13 @@
             android:text="-" />
 
         <TextView
-            android:id="@+id/nbPointsText"
+            android:id="@+id/distanceText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Number of measurements :" />
+            android:text="Distance between last two points :" />
 
         <TextView
-            android:id="@+id/nbPointsDisplay"
+            android:id="@+id/distanceDisplay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="-" />

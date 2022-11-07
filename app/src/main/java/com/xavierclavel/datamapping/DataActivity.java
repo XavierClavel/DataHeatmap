@@ -4,14 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class DataActivity extends AppCompatActivity {
@@ -24,7 +20,6 @@ public class DataActivity extends AppCompatActivity {
     static TextView networkTypeDisplay;
     static TextView networkDetailDisplay;
     static TextView locationDataDisplay;
-    public static TextView nbPointsDisplay;
 
     public static LatLng lastLocation = null;
     static Integer lastDownSpeed = null;
@@ -33,6 +28,7 @@ public class DataActivity extends AppCompatActivity {
     static String lastNetworkType = null;
     static String lastNetworkDetail = null;
     static String lastLocationData = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +42,9 @@ public class DataActivity extends AppCompatActivity {
         networkTypeDisplay = findViewById(R.id.networkTypeDisplay);
         networkDetailDisplay = findViewById(R.id.networkDetailDisplay);
         locationDataDisplay = findViewById(R.id.locationDataDisplay);
-        nbPointsDisplay = findViewById(R.id.nbPointsDisplay);
 
         activityInitialized = true;
+
         if (lastLocation != null) locationDisplay.setText(lastLocation.toString());
         if (lastDownSpeed != null) downSpeedDisplay.setText(lastDownSpeed + " kbps");
         if (lastUpSpeed != null) upSpeedDisplay.setText(lastUpSpeed + " kbps");
@@ -56,9 +52,13 @@ public class DataActivity extends AppCompatActivity {
         if (lastNetworkType != null) networkTypeDisplay.setText(lastNetworkType);
         if (lastNetworkDetail != null) networkDetailDisplay.setText(lastNetworkDetail);
         if (lastLocationData != null) locationDataDisplay.setText(lastLocationData);
-        nbPointsDisplay.setText("" + HeatmapManager.nbPoints);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        activityInitialized = false;
+    }
 
     static void updateLocationDisplay(LatLng location) {
         lastLocation = location;
@@ -84,9 +84,10 @@ public class DataActivity extends AppCompatActivity {
     }
 
     public static void updateLocationData(String data) {
+        lastLocationData = data;
+        if (instance == null) return;
         TextView locationDataDisplay = instance.findViewById(R.id.locationDataDisplay);
         locationDataDisplay.setText(data);
-        lastLocationData = data;
     }
 
     static String networkTypeToString(int networkType) {

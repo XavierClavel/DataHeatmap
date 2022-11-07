@@ -1,8 +1,6 @@
 package com.xavierclavel.datamapping;
 
-import android.graphics.Color;
 import android.util.Log;
-import android.view.View;
 import android.widget.TableRow;
 
 import com.google.android.gms.maps.GoogleMap;
